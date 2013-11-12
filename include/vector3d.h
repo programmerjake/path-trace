@@ -2,6 +2,8 @@
 #define VECTOR3D_H
 
 #include <cmath>
+#include <random>
+#include <assert.h>
 
 namespace PathTrace
 {
@@ -96,6 +98,58 @@ public:
     friend bool operator !=(const Vector3D & l, const Vector3D & r)
     {
         return l.x != r.x || l.y != r.y || l.z != r.z;
+    }
+    const Vector3D & operator +=(const Vector & r)
+    {
+        *this = *this + r;
+        return *this;
+    }
+    const Vector3D & operator -=(const Vector & r)
+    {
+        *this = *this - r;
+        return *this;
+    }
+    const Vector3D & operator *=(const Vector & r)
+    {
+        *this = *this * r;
+        return *this;
+    }
+    const Vector3D & operator /=(const Vector & r)
+    {
+        *this = *this / r;
+        return *this;
+    }
+    const Vector3D & operator *=(double r)
+    {
+        *this = *this * r;
+        return *this;
+    }
+    const Vector3D & operator /=(double r)
+    {
+        *this = *this / r;
+        return *this;
+    }
+    template<typename randomNumberGeneratorType>
+    static Vector3D rand(randomNumberGeneratorType & r, double max = 1, double min = 0)
+    {
+        assert(max >= 0);
+        assert(min < max || min == 0);
+        if(max == 0)
+            return Vector3D(0, 0, 0);
+        std::uniform_real_distribution<double> distribution(-max,max);
+        Vector3D retval;
+        double mag;
+        do
+        {
+            retval.x = distribution(r);
+            retval.y = distribution(r);
+            retval.z = distribution(r);
+            mag = abs(retval);
+        }
+        while(mag > max || (min > 0 && mag == 0));
+        if(min > 0)
+            return retval * ((max + mag * (max - min)) / mag);
+        return retval;
     }
 protected:
 private:
