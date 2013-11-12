@@ -1,7 +1,8 @@
 #ifndef SPAN_H
 #define SPAN_H
 
-#include "path-trace.h"
+#include "vector3d.h"
+#include "material.h"
 
 namespace PathTrace
 {
@@ -10,18 +11,30 @@ class Span
 {
 public:
     double start;
+    Vector3D startNormal;
+    const Material * startMaterial;
     double end;
+    Vector3D endNormal;
+    const Material * endMaterial;
 
     Span()
     {
         start = 0;
+        startNormal = Vector3D(0, 0, 0);
+        startMaterial = nullptr;
         end = 0;
+        endNormal = Vector3D(0, 0, 0);
+        endMaterial = nullptr;
     }
 
-    Span(double start, double end)
+    Span(double start, Vector3D startNormal, const Material * startMaterial, double end, Vector3D endNormal, const Material * endMaterial)
     {
         this->start = start;
+        this->startNormal = startNormal;
+        this->startMaterial = startMaterial;
         this->end = end;
+        this->endNormal = endNormal;
+        this->endMaterial = endMaterial;
     }
 
     virtual ~Span()
@@ -31,13 +44,21 @@ public:
     Span(const Span & rt)
     {
         start = rt.start;
+        startNormal = rt.startNormal;
+        startMaterial = rt.startMaterial;
         end = rt.end;
+        endNormal = rt.endNormal;
+        endMaterial = rt.endMaterial;
     }
 
     const Span & operator =(const Span & rt)
     {
         start = rt.start;
+        startNormal = rt.startNormal;
+        startMaterial = rt.startMaterial;
         end = rt.end;
+        endNormal = rt.endNormal;
+        endMaterial = rt.endMaterial;
         return *this;
     }
 
@@ -74,15 +95,17 @@ public:
     virtual void free() = 0;
     virtual const Span & operator *() const = 0;
     virtual const Span * operator ->() const = 0;
+    virtual bool isAtEnd() const = 0;
+    virtual void next() = 0;
+
     const Span * operator ->*() const
     {
         return operator ->();
     }
+
     virtual ~SpanIterator()
     {
     }
-
-    virtual bool isAtEnd() const = 0;
 
     bool operator !() const
     {
@@ -93,8 +116,6 @@ public:
     {
         return !isAtEnd();
     }
-
-    virtual void next() = 0;
 
     void operator ++(int)
     {

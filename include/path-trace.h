@@ -11,6 +11,7 @@ const double max_value = 1e100;
 
 #include "vector3d.h"
 #include "span.h"
+#include "material.h"
 #include "object.h"
 
 #endif // PATH-TRACE_H_INCLUDED

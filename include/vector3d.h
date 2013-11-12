@@ -151,6 +151,23 @@ public:
             return retval * ((max + mag * (max - min)) / mag);
         return retval;
     }
+    Vector3D reflect(Vector3D normal) const
+    {
+        normal = normalize(normal);
+        return *this - 2 * dot(*this, normal) * normal;
+    }
+    Vector3D refract(double relative_ior, Vector3D normal) const
+    {
+        if(relative_ior < eps || relative_ior > 1 / eps || normal == Vector3D(0, 0, 0) || *this == Vector3D(0, 0, 0))
+            return Vector3D(0, 0, 0);
+        normal = normalize(normal);
+        Vector3D incident = normalize(*this);
+        double incident_dot_normal = dot(incident, normal);
+        double sqrt_arg = 1 - relative_ior * relative_ior * (1 - incident_dot_normal * incident_dot_normal);
+        if(sqrt_arg < 0)
+            return Vector3D(0, 0, 0);
+        return normalize(relative_ior * incident - (relative_ior + std::sqrt(sqrt_arg)) * normal);
+    }
 protected:
 private:
 };
