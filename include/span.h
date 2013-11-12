@@ -1,7 +1,7 @@
 #ifndef SPAN_H
 #define SPAN_H
 
-#include <iterator>
+#include "path-trace.h"
 
 namespace PathTrace
 {
@@ -81,6 +81,33 @@ public:
     virtual ~SpanIterator()
     {
     }
+
+    virtual bool isAtEnd() const = 0;
+
+    bool operator !() const
+    {
+        return isAtEnd();
+    }
+
+    operator bool() const
+    {
+        return !isAtEnd();
+    }
+
+    virtual void next() = 0;
+
+    void operator ++(int)
+    {
+        next();
+    }
+
+    const SpanIterator & operator ++()
+    {
+        next();
+        return *this;
+    }
+
+
 protected:
     SpanIterator()
     {
