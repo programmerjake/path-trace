@@ -41,10 +41,6 @@ public:
         theSpan.startNormal = normalize(ray.getPoint(theSpan.start) - center);
         theSpan.endNormal = normalize(ray.getPoint(theSpan.end) - center);
     }
-    virtual void free()
-    {
-        delete this;
-    }
     virtual const Span & operator *() const
     {
         return theSpan;
@@ -71,7 +67,7 @@ private:
 };
 }
 
-SpanIterator * Sphere::makeSpanIterator(const Ray & ray)
+SpanIterator * Sphere::makeSpanIterator(const Ray & ray) const
 {
     return new SphereSpanIterator(center, r_squared, material, ray);
 }

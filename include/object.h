@@ -11,7 +11,7 @@ class Object
 {
 public:
     Object();
-    virtual SpanIterator * makeSpanIterator(const Ray & ray) = 0;
+    virtual SpanIterator * makeSpanIterator(const Ray & ray) const = 0;
 protected:
 private:
 };

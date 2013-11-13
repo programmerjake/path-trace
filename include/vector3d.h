@@ -134,7 +134,7 @@ public:
     static Vector3D rand(randomNumberGeneratorType & r, double max = 1, double min = 0)
     {
         assert(max >= 0);
-        assert(min < max || min == 0);
+        assert(min <= max || min == 0);
         if(max == 0)
             return Vector3D(0, 0, 0);
         std::uniform_real_distribution<double> distribution(-max,max);

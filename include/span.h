@@ -92,7 +92,6 @@ public:
 class SpanIterator
 {
 public:
-    virtual void free() = 0;
     virtual const Span & operator *() const = 0;
     virtual const Span * operator ->() const = 0;
     virtual bool isAtEnd() const = 0;
