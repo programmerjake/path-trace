@@ -1,8 +1,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "path-trace.h"
 #include "span.h"
+#include "ray.h"
 
 namespace PathTrace
 {

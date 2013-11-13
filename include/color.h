@@ -14,6 +14,7 @@ struct Color
         retval.g = g;
         retval.b = b;
         retval.a = 1;
+        return retval;
     }
     static Color rgba(double r, double g, double b, double a)
     {
@@ -22,19 +23,20 @@ struct Color
         retval.g = g;
         retval.b = b;
         retval.a = a;
+        return retval;
     }
-    const static Color Black = rgb(0, 0, 0);
-    const static Color Clear = rgba(0, 0, 0, 0);
-    const static Color White = rgb(1, 1, 1);
-    const static Color LightGray = rgb(0.75, 0.75, 0.75);
-    const static Color DarkGray = rgb(0.25, 0.25, 0.25);
-    const static Color Gray = rgb(0.5, 0.5, 0.5);
-    const static Color Blue = rgb(0, 0, 1);
-    const static Color Green = rgb(0, 1, 0);
-    const static Color Yellow = rgb(0, 1, 1);
-    const static Color Red = rgb(1, 0, 0);
-    const static Color Magenta = rgb(1, 0, 1);
-    const static Color Cyan = rgb(1, 1, 0);
+    const static Color Black;
+    const static Color Clear;
+    const static Color White;
+    const static Color LightGray;
+    const static Color DarkGray;
+    const static Color Gray;
+    const static Color Blue;
+    const static Color Green;
+    const static Color Yellow;
+    const static Color Red;
+    const static Color Magenta;
+    const static Color Cyan;
     static Color gray(double v, double a = 1)
     {
         return rgba(v, v, v, a);
@@ -46,6 +48,7 @@ struct Color
         retval.g = l.g * l.a + r.g * r.a;
         retval.b = l.b * l.a + r.b * r.a;
         retval.a = 1 - (1 - l.a) * (1 - r.a);
+        return retval;
     }
     Color operator -() const
     {
@@ -70,6 +73,7 @@ struct Color
         retval.g += back.g * (1 - front.a);
         retval.b += back.b * (1 - front.a);
         retval.a = 1 - (1 - back.a) * (1 - front.a);
+        return retval;
     }
 };
 

@@ -17,7 +17,6 @@ private:
     Vector3D center;
     const Material * material;
     double r, r_squared;
-    friend class SphereSpanIterator;
 };
 
 }

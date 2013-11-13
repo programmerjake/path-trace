@@ -98,11 +98,6 @@ public:
     virtual bool isAtEnd() const = 0;
     virtual void next() = 0;
 
-    const Span * operator ->*() const
-    {
-        return operator ->();
-    }
-
     virtual ~SpanIterator()
     {
     }

@@ -14,13 +14,13 @@ struct Ray
     {
         this->origin = origin;
         this->dir = normalize(dir);
-        assert(this->dir != Vector3D(0, 0, 0))
+        assert(this->dir != Vector3D(0, 0, 0));
     }
-    Vector3D getPoint(double t)
+    Vector3D getPoint(double t) const
     {
         return origin + t * dir;
     }
-}
+};
 
 }
 

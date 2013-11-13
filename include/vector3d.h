@@ -4,6 +4,7 @@
 #include <cmath>
 #include <random>
 #include <assert.h>
+#include "misc.h"
 
 namespace PathTrace
 {
@@ -99,22 +100,22 @@ public:
     {
         return l.x != r.x || l.y != r.y || l.z != r.z;
     }
-    const Vector3D & operator +=(const Vector & r)
+    const Vector3D & operator +=(const Vector3D & r)
     {
         *this = *this + r;
         return *this;
     }
-    const Vector3D & operator -=(const Vector & r)
+    const Vector3D & operator -=(const Vector3D & r)
     {
         *this = *this - r;
         return *this;
     }
-    const Vector3D & operator *=(const Vector & r)
+    const Vector3D & operator *=(const Vector3D & r)
     {
         *this = *this * r;
         return *this;
     }
-    const Vector3D & operator /=(const Vector & r)
+    const Vector3D & operator /=(const Vector3D & r)
     {
         *this = *this / r;
         return *this;
