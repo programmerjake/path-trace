@@ -35,7 +35,7 @@ int main()
     while(!done)
     {
         SDL_Event event;
-        while(true)
+        while(!done)
         {
             if(rendered)
             {
@@ -72,13 +72,14 @@ int main()
                 ;
             for(int x = 0; x < screen->w; x++)
             {
-                Color rayColor = tracePixel(world, x, y, screen->w, screen->h);
+                Color rayColor = tracePixel(world, x, y, screen->w, screen->h, 1);
                 int r = max(0, min(0xFF, (int)floor(0x100 * rayColor.x)));
                 int g = max(0, min(0xFF, (int)floor(0x100 * rayColor.y)));
                 int b = max(0, min(0xFF, (int)floor(0x100 * rayColor.z)));
                 *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
             }
             SDL_UnlockSurface(screen);
+            SDL_Flip(screen);
             y++;
             if(y >= screen->h)
             {

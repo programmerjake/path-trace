@@ -101,7 +101,7 @@ template <typename T = std::default_random_engine>
 inline Color tracePixel(const Object * world, double px, double py, double screenXResolution, double screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T randomEngine = DefaultRandomEngine)
 {
     double x = 2 * px / screenXResolution - 1;
-    double y = 1 - 2 * py / screenYResolution - 1;
+    double y = 1 - 2 * py / screenYResolution;
     Ray ray = Ray(Vector3D(0, 0, 0), Vector3D(x * screenWidth, y * screenHeight, -screenDistance));
     Color retval = Color(0, 0, 0);
     for(int i = 0; i < sampleCount; i++)
