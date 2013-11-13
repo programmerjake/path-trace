@@ -4,6 +4,7 @@
 #include <cmath>
 #include <random>
 #include <assert.h>
+#include <iostream>
 #include "misc.h"
 
 namespace PathTrace
@@ -149,7 +150,8 @@ public:
         }
         while(mag > max || (min > 0 && mag == 0));
         if(min > 0)
-            return retval * ((max + mag * (max - min)) / mag);
+            retval *= ((max + mag * (max - min)) / mag);
+        //std::cout << retval << std::endl;
         return retval;
     }
     Vector3D reflect(Vector3D normal) const
@@ -168,6 +170,10 @@ public:
         if(sqrt_arg < 0)
             return Vector3D(0, 0, 0);
         return normalize(relative_ior * incident - (relative_ior + std::sqrt(sqrt_arg)) * normal);
+    }
+    friend std::ostream & operator <<(std::ostream & o, const Vector3D & v)
+    {
+        return o << "<" << v.x << ", " << v.y << ", " << v.z << ">";
     }
 protected:
 private:

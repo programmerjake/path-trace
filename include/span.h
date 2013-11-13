@@ -87,6 +87,34 @@ public:
             return false;
         return true;
     }
+
+    void copyStartFromStart(const Span & span)
+    {
+        start = span.start;
+        startMaterial = span.startMaterial;
+        startNormal = span.startNormal;
+    }
+
+    void copyEndFromStart(const Span & span)
+    {
+        end = span.start;
+        endMaterial = span.startMaterial;
+        endNormal = span.startNormal;
+    }
+
+    void copyStartFromEnd(const Span & span)
+    {
+        start = span.end;
+        startMaterial = span.endMaterial;
+        startNormal = span.endNormal;
+    }
+
+    void copyEndFromEnd(const Span & span)
+    {
+        end = span.end;
+        endMaterial = span.endMaterial;
+        endNormal = span.endNormal;
+    }
 };
 
 class SpanIterator

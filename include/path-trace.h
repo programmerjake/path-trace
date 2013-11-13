@@ -8,6 +8,7 @@
 #include "material.h"
 #include "object.h"
 #include "sphere.h"
+#include "union.h"
 #include <random>
 
 namespace PathTrace
@@ -15,7 +16,7 @@ namespace PathTrace
 extern std::default_random_engine DefaultRandomEngine;
 const int DefaultRayDepth = 16;
 template <typename T = std::default_random_engine>
-inline Color traceRay(const Ray & ray, const Object * world, int depth = DefaultRayDepth, T randomEngine = DefaultRandomEngine)
+inline Color traceRay(const Ray & ray, const Object * world, int depth = DefaultRayDepth, T & randomEngine = DefaultRandomEngine)
 {
     SpanIterator & i = *world->makeSpanIterator(ray);
     AutoDestruct<SpanIterator> autoDestruct1(&i);
@@ -77,7 +78,7 @@ inline Color traceRay(const Ray & ray, const Object * world, int depth = Default
         do
         {
             count++;
-            assert(count > 1000);
+            assert(count <= 1000);
             if(count > 1000)
                 return retval;
             resultingRayDir = Vector3D::rand(randomEngine, 1, 0);
@@ -98,7 +99,7 @@ const double DefaultScreenHeight = 1.0;
 const double DefaultScreenDistance = 2.0;
 
 template <typename T = std::default_random_engine>
-inline Color tracePixel(const Object * world, double px, double py, double screenXResolution, double screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T randomEngine = DefaultRandomEngine)
+inline Color tracePixel(const Object * world, double px, double py, double screenXResolution, double screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T & randomEngine = DefaultRandomEngine)
 {
     double x = 2 * px / screenXResolution - 1;
     double y = 1 - 2 * py / screenYResolution;
@@ -113,7 +114,7 @@ inline Color tracePixel(const Object * world, double px, double py, double scree
 }
 
 template <typename T = std::default_random_engine>
-inline Color tracePixel(const Object * world, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T randomEngine = DefaultRandomEngine)
+inline Color tracePixel(const Object * world, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T & randomEngine = DefaultRandomEngine)
 {
     return tracePixel(world, px + 0.5, py + 0.5, (double)screenXResolution, (double)screenYResolution, sampleCount, screenWidth, screenHeight, screenDistance, randomEngine);
 }
