@@ -21,6 +21,7 @@ int main()
     }
     atexit(SDL_Quit);
     SDL_Surface * screen = SDL_SetVideoMode(1024, 768, 32, SDL_DOUBLEBUF);
+    if(screen == NULL)
     {
         cerr << "\nUnable to set video mode:  " << SDL_GetError() << endl;
         return EXIT_FAILURE;
