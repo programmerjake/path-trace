@@ -8,20 +8,27 @@ using namespace PathTrace;
 
 Object * makeWorld()
 {
-    static Material matEmitR = Material(Color(0, 0, 0), 0, Color(2, 0, 0));
-    static Material matEmitG = Material(Color(0, 0, 0), 0, Color(0, 2, 0));
-    static Material matEmitB = Material(Color(0, 0, 0), 0, Color(0, 0, 2));
-    static Material matDiffuseWhite = Material(Color(1, 1, 1), 1);
-    static Material matGlass = Material(Color(0.1, 0.1, 0.1), 0, Color(0, 0, 0), Color(0.9, 0.9, 0.9), 1.3, 1);
+    static Material matEmitR = Material(Color(0, 0, 0), 0, Color(6, 0, 0));
+    static Material matEmitG = Material(Color(0, 0, 0), 0, Color(0, 6, 0));
+    static Material matEmitB = Material(Color(0, 0, 0), 0, Color(0, 0, 6));
+    static Material matEmitW = Material(Color(0, 0, 0), 0, Color(2, 2, 2));
+    static Material matDiffuseWhite = Material(Color(0.8, 0.8, 0.8), 1);
+    static Material matGlass = Material(Color(0.5, 0.5, 0.5), 0, Color(0, 0, 0), Color(0.9, 0.9, 0.9), 1.3, 1);
     static Material matMirror = Material(Color(0.99, 0.99, 0.99), 0);
     Object * spheres[] =
     {
-        new Sphere(Vector3D(1, 20, -3), 15, &matEmitR),
-        new Sphere(Vector3D(0, 20, -2), 15, &matEmitG),
-        new Sphere(Vector3D(-1, 20, -3), 15, &matEmitB),
+        new Sphere(Vector3D(1, 8, -3), 3, &matEmitR),
+        new Sphere(Vector3D(0, 8, -2), 3, &matEmitG),
+        new Sphere(Vector3D(-1, 8, -3), 3, &matEmitB),
         new Sphere(Vector3D(0, -6, -3), 5, &matDiffuseWhite),
         new Sphere(Vector3D(1, -0.5, -3), 0.5, &matDiffuseWhite),
-        new Sphere(Vector3D(-1, -0.5, -3), 0.5, &matMirror),
+        new Sphere(Vector3D(0, 0, -3000), 3000 - 20, &matDiffuseWhite),
+        new Sphere(Vector3D(0, 0, 3000), 3000 - 20, &matDiffuseWhite),
+        new Sphere(Vector3D(0, -3000, 0), 3000 - 20, &matDiffuseWhite),
+        new Sphere(Vector3D(0, 3000, 0), 3000 - 20, &matEmitW),
+        new Sphere(Vector3D(-3000, 0, 0), 3000 - 20, &matDiffuseWhite),
+        new Sphere(Vector3D(3000, 0, 0), 3000 - 20, &matDiffuseWhite),
+        new Sphere(Vector3D(-1, -0.5, -3), 0.5, &matGlass),
     };
     Object * retval = spheres[0];
     for(unsigned i = 1; i < sizeof(spheres) / sizeof(spheres[0]); i++)
@@ -68,7 +75,7 @@ int main()
     int y = 0;
     int count = 1;
     const int maxCount = 50000;
-    const int rayCount = 100;
+    const int rayCount = 20;
     Color * screenBuffer = new Color[ScreenWidth * ScreenHeight];
     Object * const world = makeWorld();
     AutoDestruct<Object> autoDestruct1(world);

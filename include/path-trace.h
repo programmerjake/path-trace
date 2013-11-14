@@ -48,9 +48,9 @@ private:
 };
 
 extern DefaultRandomEngine defaultRandomEngine;
-const int DefaultRayDepth = 16;
+const int DefaultRayDepth = 4;
 template <typename T = DefaultRandomEngine>
-inline Color traceRay(const Ray & ray, const Object * world, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine)
+inline Color traceRay(const Ray & ray, const Object * world, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine, double strength = 1.0)
 {
     SpanIterator & i = *world->makeSpanIterator(ray);
     AutoDestruct<SpanIterator> autoDestruct1(&i);
@@ -80,7 +80,7 @@ inline Color traceRay(const Ray & ray, const Object * world, int depth = Default
         if(i->end >= eps)
         {
             t = i->end;
-            normal = i->endNormal;
+            normal = -i->endNormal;
             material = i->endMaterial;
             assert(material != nullptr);
             assert(material->ior > eps);
@@ -93,18 +93,18 @@ inline Color traceRay(const Ray & ray, const Object * world, int depth = Default
         return Color(0, 0, 0);
     }
     Color retval = material->emissive;
-    if(depth <= 0)
+    if(depth <= 0 || strength < 0.02)
     {
         return retval;
     }
     std::uniform_real_distribution<double> zeroToOne(0, 1);
-    if(zeroToOne(randomEngine) < material->transmit_reflect_coefficient) // transmit
+    if(zeroToOne(randomEngine) < material->transmit_reflect_coefficient * ray.dir.refractStrength(ior, normal)) // transmit
     {
         Vector3D refractedRayDir = ray.dir.refract(ior, normal);
         if(refractedRayDir != Vector3D(0, 0, 0))
         {
             Ray newRay = Ray(ray.getPoint(t), refractedRayDir);
-            retval += material->transmit * traceRay(newRay, world, depth - 1, randomEngine);
+            retval += material->transmit * traceRay(newRay, world, depth - 1, randomEngine, strength * abs(material->transmit));
             return retval;
         }
     }
@@ -134,7 +134,7 @@ inline Color traceRay(const Ray & ray, const Object * world, int depth = Default
 
     double factor = 1 - (1 - dot(resultingRayDir, normal)) * material->scatter_coefficient;
     Ray newRay = Ray(ray.getPoint(t), resultingRayDir);
-    return retval + factor * material->reflect * traceRay(newRay, world, depth - 1, randomEngine);
+    return retval + factor * material->reflect * traceRay(newRay, world, depth - 1, randomEngine, strength * factor * abs(material->reflect));
 }
 
 const int DefaultSampleCount = 200;

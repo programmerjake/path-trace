@@ -49,7 +49,7 @@ public:
     }
 
     UnionSpanIterator(SpanIterator * spanIteratorA, SpanIterator * spanIteratorB)
-        : spanIteratorA(*spanIteratorA), spanIteratorB(*spanIteratorB), aEnded(false), bEnded(false), ended(false)
+        : spanIteratorA(*spanIteratorA), spanIteratorB(*spanIteratorB), ended(false), aEnded(false), bEnded(false)
     {
         nextA();
         nextB();
