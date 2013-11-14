@@ -2,5 +2,5 @@
 
 namespace PathTrace
 {
-std::default_random_engine DefaultRandomEngine;
+DefaultRandomEngine defaultRandomEngine;
 }
