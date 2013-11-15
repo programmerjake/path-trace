@@ -6,9 +6,25 @@
 using namespace std;
 using namespace PathTrace;
 const bool multiThreaded = true;
-const int rendererCount = 2;
+const int rendererCount = 4;
 const int maxCount = 50000;
-const int rayCount = 50;
+const int rayCount = 200;
+const int ScreenWidth = 320, ScreenHeight = 240;
+const char * const ProgramName = "Path Trace Test";
+
+Object * unionArray(Object * array[], int start, int end)
+{
+    if(end - start == 1)
+    {
+        return array[start];
+    }
+    if(end - start == 2)
+    {
+        return new Union(array[start], array[start + 1]);
+    }
+    int split = (end - start) / 2 + start;
+    return new Union(unionArray(array, start, split), unionArray(array, split, end));
+}
 
 Object * makeWorld()
 {
@@ -16,34 +32,28 @@ Object * makeWorld()
     static Material matEmitG = Material(Color(0, 0, 0), 0, Color(0, 6, 0));
     static Material matEmitB = Material(Color(0, 0, 0), 0, Color(0, 0, 6));
     static Material matEmitW = Material(Color(0, 0, 0), 0, Color(2, 2, 2));
+    static Material matEmitBrightW = Material(Color(0, 0, 0), 0, Color(20, 20, 20));
     static Material matDiffuseWhite = Material(Color(0.8, 0.8, 0.8), 1);
     static Material matGlass = Material(Color(0.5, 0.5, 0.5), 0, Color(0, 0, 0), Color(0.9, 0.9, 0.9), 1.3, 1);
     static Material matMirror = Material(Color(0.99, 0.99, 0.99), 0);
-    Object * spheres[] =
+    Object * objects[] =
     {
-        new Sphere(Vector3D(1, 8, -3), 3, &matEmitR),
+        /*new Sphere(Vector3D(1, 8, -3), 3, &matEmitR),
         new Sphere(Vector3D(0, 8, -2), 3, &matEmitG),
-        new Sphere(Vector3D(-1, 8, -3), 3, &matEmitB),
+        new Sphere(Vector3D(-1, 8, -3), 3, &matEmitB),*/
+        new Sphere(Vector3D(0, 8, 0), 2, &matEmitBrightW),
         new Sphere(Vector3D(0, -6, -3), 5, &matDiffuseWhite),
         new Sphere(Vector3D(1, -0.5, -3), 0.5, &matDiffuseWhite),
-        new Sphere(Vector3D(0, 0, -3000), 3000 - 20, &matDiffuseWhite),
-        new Sphere(Vector3D(0, 0, 3000), 3000 - 20, &matDiffuseWhite),
-        new Sphere(Vector3D(0, -3000, 0), 3000 - 20, &matDiffuseWhite),
-        new Sphere(Vector3D(0, 3000, 0), 3000 - 20, &matEmitW),
-        new Sphere(Vector3D(-3000, 0, 0), 3000 - 20, &matDiffuseWhite),
-        new Sphere(Vector3D(3000, 0, 0), 3000 - 20, &matDiffuseWhite),
-        new Sphere(Vector3D(-1, -0.5, -3), 0.5, &matGlass),
+        new Plane(Vector3D(0, 0, -1), 20, &matDiffuseWhite),
+        new Plane(Vector3D(0, 0, 1), 20, &matDiffuseWhite),
+        new Plane(Vector3D(0, -1, 0), 20, &matDiffuseWhite),
+        new Plane(Vector3D(0, 1, 0), 20, &matDiffuseWhite),
+        new Plane(Vector3D(-1, 0, 0), 20, &matDiffuseWhite),
+        new Plane(Vector3D(1, 0, 0), 20, &matDiffuseWhite),
+        new Sphere(Vector3D(-1, 0, -3), 0.5, &matGlass),
     };
-    Object * retval = spheres[0];
-    for(unsigned i = 1; i < sizeof(spheres) / sizeof(spheres[0]); i++)
-    {
-        retval = new Union(retval, spheres[i]);
-    }
-    return retval;
+    return unionArray(objects, 0, sizeof(objects) / sizeof(objects[0]));
 }
-
-const int ScreenWidth = 320, ScreenHeight = 240;
-const char * const ProgramName = "Path Trace Test";
 
 class RenderLine
 {
@@ -52,7 +62,9 @@ public:
         : rayCount(rayCount), x(x), y(y), buffer(buffer), bufferSize(bufferSize), world(world), ran_finish(false)
     {
         if(multiThreaded)
+        {
             thread = SDL_CreateThread(runFn, (void *)this);
+        }
     }
     void finish()
     {
@@ -62,9 +74,13 @@ public:
         }
         ran_finish = true;
         if(multiThreaded)
+        {
             SDL_WaitThread(thread, NULL);
+        }
         else
+        {
             run();
+        }
     }
     ~RenderLine()
     {

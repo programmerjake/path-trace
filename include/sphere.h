@@ -9,14 +9,14 @@ namespace PathTrace
 class Sphere : public Object
 {
 public:
-    Sphere(Vector3D center, double r, const Material * material);
+    Sphere(Vector3D center, float r, const Material * material);
     virtual ~Sphere();
     virtual SpanIterator * makeSpanIterator() const;
 protected:
 private:
     Vector3D center;
     const Material * material;
-    double r, r_squared;
+    float r, r_squared;
 };
 
 }

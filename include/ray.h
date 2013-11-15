@@ -16,7 +16,7 @@ struct Ray
         this->dir = normalize(dir);
         assert(this->dir != Vector3D(0, 0, 0));
     }
-    Vector3D getPoint(double t) const
+    Vector3D getPoint(float t) const
     {
         return origin + t * dir;
     }

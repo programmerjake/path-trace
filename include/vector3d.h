@@ -13,14 +13,14 @@ namespace PathTrace
 class Vector3D
 {
 public:
-    double x, y, z;
+    float x, y, z;
     Vector3D()
     {
         x = 0;
         y = 0;
         z = 0;
     }
-    Vector3D(double x, double y, double z)
+    Vector3D(float x, float y, float z)
     {
         this->x = x;
         this->y = y;
@@ -58,34 +58,34 @@ public:
     {
         return Vector3D(l.x / r.x, l.y / r.y, l.z / r.z);
     }
-    friend Vector3D operator /(const Vector3D & l, double r)
+    friend Vector3D operator /(const Vector3D & l, float r)
     {
         return Vector3D(l.x / r, l.y / r, l.z / r);
     }
-    friend Vector3D operator *(const Vector3D & l, double r)
+    friend Vector3D operator *(const Vector3D & l, float r)
     {
         return Vector3D(l.x * r, l.y * r, l.z * r);
     }
-    friend Vector3D operator *(double l, const Vector3D & r)
+    friend Vector3D operator *(float l, const Vector3D & r)
     {
         return operator *(r, l);
     }
-    friend double dot(const Vector3D & l, const Vector3D & r)
+    friend float dot(const Vector3D & l, const Vector3D & r)
     {
         Vector3D v = l * r;
         return v.x + v.y + v.z;
     }
-    friend double abs_squared(const Vector3D & v)
+    friend float abs_squared(const Vector3D & v)
     {
         return dot(v, v);
     }
-    friend double abs(const Vector3D & v)
+    friend float abs(const Vector3D & v)
     {
         return std::sqrt(abs_squared(v));
     }
     friend Vector3D normalize(const Vector3D & v)
     {
-        double magnitude = abs(v);
+        float magnitude = abs(v);
         if(magnitude == 0) magnitude = 1;
         return v / magnitude;
     }
@@ -121,26 +121,26 @@ public:
         *this = *this / r;
         return *this;
     }
-    const Vector3D & operator *=(double r)
+    const Vector3D & operator *=(float r)
     {
         *this = *this * r;
         return *this;
     }
-    const Vector3D & operator /=(double r)
+    const Vector3D & operator /=(float r)
     {
         *this = *this / r;
         return *this;
     }
     template<typename randomNumberGeneratorType>
-    static Vector3D rand(randomNumberGeneratorType & r, double max = 1, double min = 0)
+    static Vector3D rand(randomNumberGeneratorType & r, float max = 1, float min = 0)
     {
         assert(max >= 0);
         assert(min <= max || min == 0);
         if(max == 0)
             return Vector3D(0, 0, 0);
-        std::uniform_real_distribution<double> distribution(-max,max);
+        std::uniform_real_distribution<float> distribution(-max,max);
         Vector3D retval;
-        double mag;
+        float mag;
         do
         {
             retval.x = distribution(r);
@@ -159,23 +159,23 @@ public:
         normal = normalize(normal);
         return *this - 2 * dot(*this, normal) * normal;
     }
-    double refractStrength(double relative_ior, Vector3D normal) const
+    float refractStrength(float relative_ior, Vector3D normal) const
     {
         if(relative_ior < eps || relative_ior > 1 / eps || normal == Vector3D(0, 0, 0) || *this == Vector3D(0, 0, 0))
             return 0;
         normal = normalize(normal);
         Vector3D incident = normalize(*this);
-        double incident_dot_normal = dot(incident, normal);
+        float incident_dot_normal = dot(incident, normal);
         return 1 - relative_ior * relative_ior * (1 - incident_dot_normal * incident_dot_normal);
     }
-    Vector3D refract(double relative_ior, Vector3D normal) const
+    Vector3D refract(float relative_ior, Vector3D normal) const
     {
         if(relative_ior < eps || relative_ior > 1 / eps || normal == Vector3D(0, 0, 0) || *this == Vector3D(0, 0, 0))
             return Vector3D(0, 0, 0);
         normal = normalize(normal);
         Vector3D incident = normalize(*this);
-        double incident_dot_normal = dot(incident, normal);
-        double sqrt_arg = 1 - relative_ior * relative_ior * (1 - incident_dot_normal * incident_dot_normal);
+        float incident_dot_normal = dot(incident, normal);
+        float sqrt_arg = 1 - relative_ior * relative_ior * (1 - incident_dot_normal * incident_dot_normal);
         if(sqrt_arg < 0)
             return Vector3D(0, 0, 0);
         return normalize(relative_ior * incident - (relative_ior * incident_dot_normal + std::sqrt(sqrt_arg)) * normal);

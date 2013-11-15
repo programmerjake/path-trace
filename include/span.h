@@ -11,10 +11,10 @@ namespace PathTrace
 class Span
 {
 public:
-    double start;
+    float start;
     Vector3D startNormal;
     const Material * startMaterial;
-    double end;
+    float end;
     Vector3D endNormal;
     const Material * endMaterial;
 
@@ -28,7 +28,7 @@ public:
         endMaterial = nullptr;
     }
 
-    Span(double start, Vector3D startNormal, const Material * startMaterial, double end, Vector3D endNormal, const Material * endMaterial)
+    Span(float start, Vector3D startNormal, const Material * startMaterial, float end, Vector3D endNormal, const Material * endMaterial)
     {
         this->start = start;
         this->startNormal = startNormal;
