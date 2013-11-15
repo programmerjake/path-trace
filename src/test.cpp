@@ -41,6 +41,46 @@ Object * makeWorld()
 const int ScreenWidth = 320, ScreenHeight = 240;
 const char * const ProgramName = "Path Trace Test";
 
+class RenderLine
+{
+public:
+    RenderLine(const int x, const int y, const int rayCount, Color * buffer, int bufferSize, const Object * world)
+        : rayCount(rayCount), x(x), y(y), buffer(buffer), bufferSize(bufferSize), world(world)
+    {
+        thread = SDL_CreateThread(runFn, (void *)this);
+    }
+    void finish()
+    {
+        if(thread == NULL)
+            return;
+        SDL_WaitThread(thread, NULL);
+        thread = NULL;
+    }
+    ~RenderLine()
+    {
+        finish();
+    }
+private:
+    void run() throw ()
+    {
+        for(int i = 0; i < bufferSize; i++)
+        {
+            buffer[i] += tracePixel(world, x + i, y, ScreenWidth, ScreenHeight, rayCount);
+        }
+    }
+    static SDLCALL int runFn(void * data)
+    {
+        ((RenderLine *)data)->run();
+        return 0;
+    }
+    const int rayCount;
+    const int x, y;
+    SDL_Thread * thread;
+    Color * buffer;
+    const int bufferSize;
+    const Object * world;
+};
+
 int main()
 {
     if(SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -75,7 +115,7 @@ int main()
     int y = 0;
     int count = 1;
     const int maxCount = 50000;
-    const int rayCount = 20;
+    const int rayCount = 200;
     Color * screenBuffer = new Color[ScreenWidth * ScreenHeight];
     Object * const world = makeWorld();
     AutoDestruct<Object> autoDestruct1(world);

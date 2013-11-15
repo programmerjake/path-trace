@@ -39,9 +39,10 @@ public:
         v = (214013 * v + 2531011);
         return (unsigned)(v >> 32);
     }
-    void discard()
+    void discard(unsigned long long count)
     {
-        operator()();
+        for(unsigned long long i=0; i<count;i++)
+            operator()();
     }
 private:
     std::uint64_t v;
