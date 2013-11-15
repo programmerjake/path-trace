@@ -11,7 +11,7 @@ class Sphere : public Object
 public:
     Sphere(Vector3D center, double r, const Material * material);
     virtual ~Sphere();
-    virtual SpanIterator * makeSpanIterator(const Ray & ray) const;
+    virtual SpanIterator * makeSpanIterator() const;
 protected:
 private:
     Vector3D center;

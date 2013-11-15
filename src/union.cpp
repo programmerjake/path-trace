@@ -49,8 +49,18 @@ public:
     }
 
     UnionSpanIterator(SpanIterator * spanIteratorA, SpanIterator * spanIteratorB)
-        : spanIteratorA(*spanIteratorA), spanIteratorB(*spanIteratorB), ended(false), aEnded(false), bEnded(false)
+        : spanIteratorA(*spanIteratorA), spanIteratorB(*spanIteratorB)
     {
+        ended = true;
+    }
+
+    virtual void init(const Ray & ray)
+    {
+        spanIteratorA.init(ray);
+        spanIteratorB.init(ray);
+        ended = false;
+        aEnded = false;
+        bEnded = false;
         nextA();
         nextB();
         next();
@@ -138,9 +148,9 @@ private:
 
 }
 
-SpanIterator * Union::makeSpanIterator(const Ray & ray) const
+SpanIterator * Union::makeSpanIterator() const
 {
-    return new UnionSpanIterator(a->makeSpanIterator(ray), b->makeSpanIterator(ray));
+    return new UnionSpanIterator(a->makeSpanIterator(), b->makeSpanIterator());
 }
 
 }

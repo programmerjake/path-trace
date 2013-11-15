@@ -5,6 +5,10 @@
 
 using namespace std;
 using namespace PathTrace;
+const bool multiThreaded = true;
+const int rendererCount = 2;
+const int maxCount = 50000;
+const int rayCount = 50;
 
 Object * makeWorld()
 {
@@ -45,28 +49,42 @@ class RenderLine
 {
 public:
     RenderLine(const int x, const int y, const int rayCount, Color * buffer, int bufferSize, const Object * world)
-        : rayCount(rayCount), x(x), y(y), buffer(buffer), bufferSize(bufferSize), world(world)
+        : rayCount(rayCount), x(x), y(y), buffer(buffer), bufferSize(bufferSize), world(world), ran_finish(false)
     {
-        thread = SDL_CreateThread(runFn, (void *)this);
+        if(multiThreaded)
+            thread = SDL_CreateThread(runFn, (void *)this);
     }
     void finish()
     {
-        if(thread == NULL)
+        if(ran_finish)
+        {
             return;
-        SDL_WaitThread(thread, NULL);
-        thread = NULL;
+        }
+        ran_finish = true;
+        if(multiThreaded)
+            SDL_WaitThread(thread, NULL);
+        else
+            run();
     }
     ~RenderLine()
     {
         finish();
     }
 private:
-    void run() throw ()
+    void run() throw()
     {
+        SpanIterator & spanIterator = *world->makeSpanIterator();
+        Color * temp = new Color[bufferSize];
         for(int i = 0; i < bufferSize; i++)
         {
-            buffer[i] += tracePixel(world, x + i, y, ScreenWidth, ScreenHeight, rayCount);
+            temp[i] = tracePixel(spanIterator, x + i, y, ScreenWidth, ScreenHeight, rayCount);
         }
+        for(int i = 0; i < bufferSize; i++)
+        {
+            buffer[i] += temp[i];
+        }
+        delete []temp;
+        delete &spanIterator;
     }
     static SDLCALL int runFn(void * data)
     {
@@ -79,6 +97,7 @@ private:
     Color * buffer;
     const int bufferSize;
     const Object * world;
+    bool ran_finish;
 };
 
 int main()
@@ -114,8 +133,6 @@ int main()
     bool rendered = false;
     int y = 0;
     int count = 1;
-    const int maxCount = 50000;
-    const int rayCount = 200;
     Color * screenBuffer = new Color[ScreenWidth * ScreenHeight];
     Object * const world = makeWorld();
     AutoDestruct<Object> autoDestruct1(world);
@@ -157,23 +174,52 @@ int main()
         if(!rendered)
         {
             bool updatedFrame = false;
-            while(SDL_LockSurface(screen) != 0)
-                ;
-            for(int x = 0; x < ScreenWidth; x++)
+            static RenderLine * renderers[rendererCount];
+            for(int i = 0; i < rendererCount; i++)
             {
-                Color & c = screenBuffer[x + ScreenWidth * y];
                 if(count <= 1)
                 {
-                    c = Color(0, 0, 0);
+                    for(int x = 0; x < ScreenWidth; x++)
+                    {
+                        Color & c = screenBuffer[x + ScreenWidth * (y + i)];
+                        c = Color(0, 0, 0);
+                    }
                 }
-                Color rayColor = tracePixel(world, x, y, ScreenWidth, ScreenHeight, rayCount);
-                c += rayColor;
-                int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
-                int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
-                int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
-                *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
+                if(y + i < ScreenHeight)
+                {
+                    renderers[i] = new RenderLine(0, i + y, rayCount, &screenBuffer[ScreenWidth * (y + i)], ScreenWidth, world);
+                }
+                else
+                {
+                    renderers[i] = nullptr;
+                }
             }
-            y++;
+            for(int i = 0; i < rendererCount; i++)
+            {
+                if(renderers[i] != nullptr)
+                {
+                    renderers[i]->finish();
+                    delete renderers[i];
+                }
+            }
+            while(SDL_LockSurface(screen) != 0)
+                ;
+            for(int i = 0; i < rendererCount; i++)
+            {
+                for(int x = 0; x < ScreenWidth; x++)
+                {
+                    Color & c = screenBuffer[x + ScreenWidth * y];
+                    int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
+                    int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
+                    int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
+                    *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
+                }
+                y++;
+                if(y >= ScreenHeight)
+                {
+                    break;
+                }
+            }
             if(y >= ScreenHeight)
             {
                 y = 0;

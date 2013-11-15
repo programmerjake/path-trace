@@ -51,38 +51,37 @@ private:
 extern DefaultRandomEngine defaultRandomEngine;
 const int DefaultRayDepth = 4;
 template <typename T = DefaultRandomEngine>
-inline Color traceRay(const Ray & ray, const Object * world, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine, double strength = 1.0)
+inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine, double strength = 1.0)
 {
-    SpanIterator & i = *world->makeSpanIterator(ray);
-    AutoDestruct<SpanIterator> autoDestruct1(&i);
+    spanIterator.init(ray);
     double t = -1;
     const Material * material;
     Vector3D normal;
     double ior = 1;
-    for(; i; i++)
+    for(; spanIterator; spanIterator++)
     {
-        if(i->start >= max_value)
+        if(spanIterator->start >= max_value)
         {
             return Color(0, 0, 0);
         }
-        if(i->start >= eps)
+        if(spanIterator->start >= eps)
         {
-            t = i->start;
-            normal = i->startNormal;
-            material = i->startMaterial;
+            t = spanIterator->start;
+            normal = spanIterator->startNormal;
+            material = spanIterator->startMaterial;
             assert(material != nullptr);
             ior = material->ior;
             break;
         }
-        if(i->end >= max_value)
+        if(spanIterator->end >= max_value)
         {
             return Color(0, 0, 0);
         }
-        if(i->end >= eps)
+        if(spanIterator->end >= eps)
         {
-            t = i->end;
-            normal = -i->endNormal;
-            material = i->endMaterial;
+            t = spanIterator->end;
+            normal = -spanIterator->endNormal;
+            material = spanIterator->endMaterial;
             assert(material != nullptr);
             assert(material->ior > eps);
             ior = 1.0 / material->ior;
@@ -105,7 +104,7 @@ inline Color traceRay(const Ray & ray, const Object * world, int depth = Default
         if(refractedRayDir != Vector3D(0, 0, 0))
         {
             Ray newRay = Ray(ray.getPoint(t), refractedRayDir);
-            retval += material->transmit * traceRay(newRay, world, depth - 1, randomEngine, strength * abs(material->transmit));
+            retval += material->transmit * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * abs(material->transmit));
             return retval;
         }
     }
@@ -135,7 +134,7 @@ inline Color traceRay(const Ray & ray, const Object * world, int depth = Default
 
     double factor = 1 - (1 - dot(resultingRayDir, normal)) * material->scatter_coefficient;
     Ray newRay = Ray(ray.getPoint(t), resultingRayDir);
-    return retval + factor * material->reflect * traceRay(newRay, world, depth - 1, randomEngine, strength * factor * abs(material->reflect));
+    return retval + factor * material->reflect * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * factor * abs(material->reflect));
 }
 
 const int DefaultSampleCount = 200;
@@ -144,7 +143,7 @@ const double DefaultScreenHeight = 1.0;
 const double DefaultScreenDistance = 2.0;
 
 template <typename T = DefaultRandomEngine>
-inline Color tracePixel(const Object * world, double px, double py, double screenXResolution, double screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
+inline Color tracePixel(SpanIterator & spanIterator, double px, double py, double screenXResolution, double screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
 {
     double x = 2 * px / screenXResolution - 1;
     double y = 1 - 2 * py / screenYResolution;
@@ -152,14 +151,14 @@ inline Color tracePixel(const Object * world, double px, double py, double scree
     Color retval = Color(0, 0, 0);
     for(int i = 0; i < sampleCount; i++)
     {
-        retval += traceRay(ray, world, DefaultRayDepth, randomEngine);
+        retval += traceRay(ray, spanIterator, DefaultRayDepth, randomEngine);
     }
     retval /= sampleCount;
     return retval;
 }
 
 template <typename T = DefaultRandomEngine>
-inline Color tracePixel(const Object * world, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
+inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, double screenWidth = DefaultScreenWidth, double screenHeight = DefaultScreenHeight, double screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
 {
     std::uniform_real_distribution<double> zeroToOne(0, 1);
     Color retval = Color(0, 0, 0);
@@ -168,7 +167,7 @@ inline Color tracePixel(const Object * world, int px, int py, int screenXResolut
         double x = 2 * (px + zeroToOne(randomEngine)) / screenXResolution - 1;
         double y = 1 - 2 * (py + zeroToOne(randomEngine)) / screenYResolution;
         Ray ray = Ray(Vector3D(0, 0, 0), Vector3D(x * screenWidth, y * screenHeight, -screenDistance));
-        retval += traceRay(ray, world, DefaultRayDepth, randomEngine);
+        retval += traceRay(ray, spanIterator, DefaultRayDepth, randomEngine);
     }
     retval /= sampleCount;
     return retval;

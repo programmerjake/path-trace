@@ -21,7 +21,14 @@ namespace
 class SphereSpanIterator : public SpanIterator
 {
 public:
-    SphereSpanIterator(const Vector3D & center, double r_squared, const Material * material, const Ray & ray)
+    SphereSpanIterator(const Vector3D & center, double r_squared, const Material * material)
+        : center(center), r_squared(r_squared)
+    {
+        theSpan.startMaterial = material;
+        theSpan.endMaterial = material;
+        ended = true;
+    }
+    virtual void init(const Ray & ray)
     {
         ended = false;
         Vector3D origin_minus_center = ray.origin - center;
@@ -36,8 +43,6 @@ public:
         double sqrt_v = std::sqrt(sqrt_arg);
         theSpan.start = -b - sqrt_v;
         theSpan.end = -b + sqrt_v;
-        theSpan.startMaterial = material;
-        theSpan.endMaterial = material;
         theSpan.startNormal = normalize(ray.getPoint(theSpan.start) - center);
         theSpan.endNormal = normalize(ray.getPoint(theSpan.end) - center);
     }
@@ -64,12 +69,14 @@ public:
 private:
     Span theSpan;
     bool ended;
+    const Vector3D center;
+    const double r_squared;
 };
 }
 
-SpanIterator * Sphere::makeSpanIterator(const Ray & ray) const
+SpanIterator * Sphere::makeSpanIterator() const
 {
-    return new SphereSpanIterator(center, r_squared, material, ray);
+    return new SphereSpanIterator(center, r_squared, material);
 }
 
 }

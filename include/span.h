@@ -3,6 +3,7 @@
 
 #include "vector3d.h"
 #include "material.h"
+#include "ray.h"
 
 namespace PathTrace
 {
@@ -124,6 +125,7 @@ public:
     virtual const Span * operator ->() const = 0;
     virtual bool isAtEnd() const = 0;
     virtual void next() = 0;
+    virtual void init(const Ray & ray) = 0;
 
     virtual ~SpanIterator()
     {
