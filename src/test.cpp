@@ -8,13 +8,16 @@
 using namespace std;
 using namespace PathTrace;
 const bool multiThreaded = true;
-const int rendererCount = 4;
+const int rendererCount = ([](int cpuCount)
+{
+    return cpuCount == 0 ? 4 : cpuCount;
+})(thread::hardware_concurrency());
 const int rayCount = 20000;
 const int rayDepth = 4;
-const int ScreenWidth = 320, ScreenHeight = 240;
+const int ScreenWidth = 640, ScreenHeight = 480;
 const char * const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 0.005; // if the color change is less than this then we don't need to check inside this box
-const int blockSize = 32, maximumSampleSize = ScreenHeight / (480 / 32);
+const int blockSize = 256, maximumSampleSize = ScreenHeight / (480 / 8);
 
 Object * unionArray(Object * array[], int start, int end)
 {
@@ -290,6 +293,8 @@ int main()
     Object * const world = makeWorld();
     AutoDestruct<Object> autoDestruct1(world);
     SDL_WM_SetCaption(ProgramName, NULL);
+    RenderBlock * renderers[rendererCount];
+    bool renderedAllBlocks = true;
     while(!done)
     {
         SDL_Event event;
@@ -326,33 +331,35 @@ int main()
         }
         if(!rendered && !done)
         {
-            static RenderBlock * renderers[rendererCount];
-            int tempX = bx, tempY = by;
-            bool anyLeft = true;
-            for(int i = 0; i < rendererCount; i++)
+            if(renderedAllBlocks)
             {
-                if(anyLeft)
+                int tempX = bx, tempY = by;
+                bool anyLeft = true;
+                for(int i = 0; i < rendererCount; i++)
                 {
-                    renderers[i] = new RenderBlock(tempX, tempY, blockSize, world);
-                    tempX += blockSize;
-                    if(tempX >= ScreenWidth)
+                    if(anyLeft)
                     {
-                        tempX = 0;
-                        tempY += blockSize;
-                        if(tempY >= ScreenHeight)
+                        renderers[i] = new RenderBlock(tempX, tempY, blockSize, world);
+                        tempX += blockSize;
+                        if(tempX >= ScreenWidth)
                         {
-                            anyLeft = false;
+                            tempX = 0;
+                            tempY += blockSize;
+                            if(tempY >= ScreenHeight)
+                            {
+                                anyLeft = false;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    renderers[i] = nullptr;
+                    else
+                    {
+                        renderers[i] = nullptr;
+                    }
                 }
             }
             if(multiThreaded)
             {
-                bool renderedAllBlocks = true;
+                renderedAllBlocks = true;
                 for(int i = 0; i < rendererCount; i++)
                 {
                     if(renderers[i] != nullptr)
@@ -368,14 +375,15 @@ int main()
                 {
                     while(SDL_LockSurface(screen) != 0)
                         ;
+                    int tempX = bx, tempY = by;
                     for(int i = 0; i < rendererCount; i++)
                     {
                         if(renderers[i] != nullptr)
                         {
                             renderers[i]->copyToBuffer(screenBuffer, ScreenWidth, ScreenHeight);
-                            for(int y = by; y < by + blockSize && y < ScreenHeight; y++)
+                            for(int y = tempY; y < tempY + blockSize && y < ScreenHeight; y++)
                             {
-                                for(int x = bx; x < bx + blockSize && x < ScreenWidth; x++)
+                                for(int x = tempX; x < tempX + blockSize && x < ScreenWidth; x++)
                                 {
                                     Color & c = screenBuffer[x + ScreenWidth * y];
                                     int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
@@ -383,6 +391,16 @@ int main()
                                     int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
                                     *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
                                 }
+                            }
+                        }
+                        tempX += blockSize;
+                        if(tempX >= ScreenWidth)
+                        {
+                            tempX = 0;
+                            tempY += blockSize;
+                            if(tempY >= ScreenHeight)
+                            {
+                                break;
                             }
                         }
                     }
