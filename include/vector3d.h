@@ -166,7 +166,10 @@ public:
         normal = normalize(normal);
         Vector3D incident = normalize(*this);
         float incident_dot_normal = dot(incident, normal);
-        return 1 - relative_ior * relative_ior * (1 - incident_dot_normal * incident_dot_normal);
+        float retval = 1 - relative_ior * relative_ior * (1 - incident_dot_normal * incident_dot_normal);
+        if(retval <= 0)
+            return 0;
+        return sqrt(sqrt(retval));
     }
     Vector3D refract(float relative_ior, Vector3D normal) const
     {

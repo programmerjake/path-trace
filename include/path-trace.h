@@ -10,6 +10,8 @@
 #include "sphere.h"
 #include "union.h"
 #include "plane.h"
+#include "intersection.h"
+#include "difference.h"
 #include <random>
 #include <cstdint>
 
@@ -50,7 +52,7 @@ private:
 };
 
 extern DefaultRandomEngine defaultRandomEngine;
-const int DefaultRayDepth = 8;
+const int DefaultRayDepth = 16;
 template <typename T = DefaultRandomEngine>
 inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine, float strength = 1.0)
 {
@@ -71,7 +73,8 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
             normal = spanIterator->startNormal;
             material = spanIterator->startMaterial;
             assert(material != nullptr);
-            ior = material->ior;
+            assert(material->ior > eps);
+            ior = 1.0 / material->ior;
             break;
         }
         if(spanIterator->end >= max_value)
@@ -85,7 +88,7 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
             material = spanIterator->endMaterial;
             assert(material != nullptr);
             assert(material->ior > eps);
-            ior = 1.0 / material->ior;
+            ior = material->ior;
             break;
         }
     }
@@ -93,6 +96,7 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
     {
         return Color(0, 0, 0);
     }
+    //ior = 1 / ior;
     Color retval = material->emissive;
     if(depth <= 0 || strength < 0.02)
     {
@@ -144,7 +148,7 @@ const float DefaultScreenHeight = 1.0;
 const float DefaultScreenDistance = 2.0;
 
 template <typename T = DefaultRandomEngine>
-inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float screenXResolution, float screenYResolution, int sampleCount = DefaultSampleCount, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
+inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float screenXResolution, float screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
 {
     float x = 2 * px / screenXResolution - 1;
     float y = 1 - 2 * py / screenYResolution;
@@ -152,14 +156,14 @@ inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float s
     Color retval = Color(0, 0, 0);
     for(int i = 0; i < sampleCount; i++)
     {
-        retval += traceRay(ray, spanIterator, DefaultRayDepth, randomEngine);
+        retval += traceRay(ray, spanIterator, rayDepth, randomEngine);
     }
     retval /= sampleCount;
     return retval;
 }
 
 template <typename T = DefaultRandomEngine>
-inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
+inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
 {
     std::uniform_real_distribution<float> zeroToOne(0, 1);
     Color retval = Color(0, 0, 0);
@@ -168,7 +172,7 @@ inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenX
         float x = 2 * (px + zeroToOne(randomEngine)) / screenXResolution - 1;
         float y = 1 - 2 * (py + zeroToOne(randomEngine)) / screenYResolution;
         Ray ray = Ray(Vector3D(0, 0, 0), Vector3D(x * screenWidth, y * screenHeight, -screenDistance));
-        retval += traceRay(ray, spanIterator, DefaultRayDepth, randomEngine);
+        retval += traceRay(ray, spanIterator, rayDepth, randomEngine);
     }
     retval /= sampleCount;
     return retval;

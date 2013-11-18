@@ -100,14 +100,14 @@ public:
     {
         end = span.start;
         endMaterial = span.startMaterial;
-        endNormal = span.startNormal;
+        endNormal = -span.startNormal;
     }
 
     void copyStartFromEnd(const Span & span)
     {
         start = span.end;
         startMaterial = span.endMaterial;
-        startNormal = span.endNormal;
+        startNormal = -span.endNormal;
     }
 
     void copyEndFromEnd(const Span & span)
