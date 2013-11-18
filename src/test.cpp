@@ -6,13 +6,13 @@
 using namespace std;
 using namespace PathTrace;
 const bool multiThreaded = true;
-const int rendererCount = 2;
-const int rayCount = 2000;
+const int rendererCount = 4;
+const int rayCount = 10000;
 const int rayDepth = 4;
 const int ScreenWidth = 320, ScreenHeight = 240;
 const char * const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 0.01; // if the color change is less than this then we don't need to check inside this box
-const int blockSize = 64, maximumSampleSize = 16;
+const int blockSize = 32, maximumSampleSize = ScreenHeight / (480 / 32);
 
 Object * unionArray(Object * array[], int start, int end)
 {
