@@ -2,16 +2,18 @@
 #include <SDL.h>
 #include <iostream>
 #include <cstdlib>
+#include <thread>
+#include <atomic>
 
 using namespace std;
 using namespace PathTrace;
 const bool multiThreaded = true;
 const int rendererCount = 4;
-const int rayCount = 10000;
+const int rayCount = 20000;
 const int rayDepth = 4;
 const int ScreenWidth = 320, ScreenHeight = 240;
 const char * const ProgramName = "Path Trace Test";
-const float minimumColorDelta = 0.01; // if the color change is less than this then we don't need to check inside this box
+const float minimumColorDelta = 0.005; // if the color change is less than this then we don't need to check inside this box
 const int blockSize = 32, maximumSampleSize = ScreenHeight / (480 / 32);
 
 Object * unionArray(Object * array[], int start, int end)
@@ -70,7 +72,7 @@ Object * makeWorld()
         new Plane(Vector3D(0, 1, 0), 1, &matDiffuseWhite),
         new Plane(Vector3D(-1, 0, 0), 20, &matDiffuseWhite),
         new Plane(Vector3D(1, 0, 0), 20, &matDiffuseWhite),
-        makeLens(Vector3D(-3.0/4, 0, -3), Vector3D(-1, 0, -3), 0.5, 1, &matGlass),
+        makeLens(Vector3D(-3.0 / 4, 0, -3), Vector3D(-1, 0, -3), 0.5, 1, &matGlass),
         makeLens(Vector3D(0, 1.5, -5), Vector3D(0, -1, -5), 0.8, &matDiamond),
     };
     return unionArray(objects, 0, sizeof(objects) / sizeof(objects[0]));
@@ -82,13 +84,15 @@ class RenderBlock
 {
 public:
     RenderBlock(const int x, const int y, int size, const Object * world)
-        : xOrigin(x), yOrigin(y), buffer(new Color[(size + 1) * (size + 1)]), validBuffer(new bool[(size + 1) * (size + 1)]), size(size), world(world), ran_finish(false)
+        : xOrigin(x), yOrigin(y), buffer(new Color[(size + 1) * (size + 1)]), validBuffer(new bool[(size + 1) * (size + 1)]), size(size), world(world), ran_finish(false), finished(false)
     {
-        for(int i=0;i<(size+1)*(size+1);i++)
+        for(int i = 0; i < (size + 1) * (size + 1); i++)
+        {
             validBuffer[i] = false;
+        }
         if(multiThreaded)
         {
-            thread = SDL_CreateThread(runFn, (void *)this);
+            theThread = new thread(runFn, this);
         }
     }
     void finish()
@@ -97,33 +101,50 @@ public:
         {
             return;
         }
-        ran_finish = true;
         if(multiThreaded)
         {
-            SDL_WaitThread(thread, NULL);
+            theThread->join();
         }
         else
         {
             run();
         }
+        ran_finish = true;
+    }
+    bool done()
+    {
+        if(ran_finish)
+        {
+            return true;
+        }
+        if(multiThreaded)
+        {
+            return finished;
+        }
+        return false;
     }
     void copyToBuffer(Color * screenBuffer, int w, int h)
     {
-        finish();
-        for(int y=yOrigin; y<yOrigin+size&&y<h; y++)
+        for(int y = yOrigin; y < yOrigin + size && y < h; y++)
         {
-            for(int x=xOrigin; x<xOrigin+size&&x<w; x++)
+            for(int x = xOrigin; x < xOrigin + size && x < w; x++)
             {
-                screenBuffer[x + w * y] = pixel(x, y);
+                if(validPixel(x, y))
+                {
+                    screenBuffer[x + w * y] = pixel(x, y);
+                }
             }
         }
     }
     ~RenderBlock()
     {
         if(multiThreaded)
+        {
             finish();
+        }
         delete []buffer;
         delete []validBuffer;
+        delete theThread;
     }
 private:
     Color & pixel(int x, int y)
@@ -137,20 +158,24 @@ private:
     void setPixel(int x, int y, Color color)
     {
         if(x < xOrigin || x - xOrigin > size)
+        {
             return;
+        }
         if(y < yOrigin || y - yOrigin > size)
+        {
             return;
+        }
         pixel(x, y) = color;
         validPixel(x, y) = true;
     }
     void interpolateSquare(int xOrigin, int yOrigin, int size, Color tl, Color tr, Color bl, Color br)
     {
-        for(int y=0; y<size; y++)
+        for(int y = 0; y < size; y++)
         {
             float fy = (float)y / size;
             Color l = tl + fy * (bl - tl);
             Color r = tr + fy * (br - tr);
-            for(int x=0; x<size; x++)
+            for(int x = 0; x < size; x++)
             {
                 float fx = (float)x / size;
                 setPixel(x + xOrigin, y + yOrigin, l + fx * (r - l));
@@ -166,7 +191,9 @@ private:
         if(x >= xOrigin && x <= size && y >= yOrigin && y <= size)
         {
             if(validPixel(x, y))
+            {
                 return pixel(x, y);
+            }
         }
         Color retval = tracePixel(*spanIterator, x, y, ScreenWidth, ScreenHeight, rayCount, rayDepth);
         setPixel(x, y, retval);
@@ -207,20 +234,21 @@ private:
         spanIterator = world->makeSpanIterator();
         renderSquare(xOrigin, yOrigin, size, calcPixelColor(xOrigin, yOrigin), calcPixelColor(xOrigin + size, yOrigin), calcPixelColor(xOrigin, yOrigin + size), calcPixelColor(xOrigin + size, yOrigin + size));
         delete spanIterator;
+        finished = true;
     }
-    static SDLCALL int runFn(void * data)
+    static void runFn(RenderBlock * data)
     {
-        ((RenderBlock *)data)->run();
-        return 0;
+        data->run();
     }
     const int xOrigin, yOrigin;
-    SDL_Thread * thread;
+    thread * theThread;
     Color * const buffer;
     bool * const validBuffer;
     const int size;
     const Object * world;
     bool ran_finish;
     SpanIterator * spanIterator;
+    atomic_bool finished;
 };
 }
 
@@ -239,25 +267,26 @@ int main()
         return EXIT_FAILURE;
     }
 
+    bool done = false;
+    bool rendered = false;
+    int bx = 0, by = 0;
+    int count = 1;
+    Color * screenBuffer = new Color[ScreenWidth * ScreenHeight];
     while(SDL_LockSurface(screen) != 0)
         ;
     for(int y = 0; y < ScreenHeight; y++)
     {
         for(int x = 0; x < ScreenWidth; x++)
         {
-            int r = ((x + y) % 20 == 0) ? 0xFF : 0;
-            int g = ((x + y) % 20 == 0) ? 0xFF : 0;
-            int b = ((x + y) % 20 == 0) ? 0xFF : 0;
+            int r = 0x40;
+            int g = 0x0;
+            int b = 0x40;
+            screenBuffer[x + y * ScreenWidth] = Color(r / (float)0xFF, g / (float)0xFF, b / (float)0xFF);
             *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
         }
     }
     SDL_UnlockSurface(screen);
     SDL_Flip(screen);
-    bool done = false;
-    bool rendered = false;
-    int bx = 0, by = 0;
-    int count = 1;
-    Color * screenBuffer = new Color[ScreenWidth * ScreenHeight];
     Object * const world = makeWorld();
     AutoDestruct<Object> autoDestruct1(world);
     SDL_WM_SetCaption(ProgramName, NULL);
@@ -321,6 +350,48 @@ int main()
                     renderers[i] = nullptr;
                 }
             }
+            if(multiThreaded)
+            {
+                bool renderedAllBlocks = true;
+                for(int i = 0; i < rendererCount; i++)
+                {
+                    if(renderers[i] != nullptr)
+                    {
+                        if(!renderers[i]->done())
+                        {
+                            renderedAllBlocks = false;
+                            break;
+                        }
+                    }
+                }
+                if(!renderedAllBlocks)
+                {
+                    while(SDL_LockSurface(screen) != 0)
+                        ;
+                    for(int i = 0; i < rendererCount; i++)
+                    {
+                        if(renderers[i] != nullptr)
+                        {
+                            renderers[i]->copyToBuffer(screenBuffer, ScreenWidth, ScreenHeight);
+                            for(int y = by; y < by + blockSize && y < ScreenHeight; y++)
+                            {
+                                for(int x = bx; x < bx + blockSize && x < ScreenWidth; x++)
+                                {
+                                    Color & c = screenBuffer[x + ScreenWidth * y];
+                                    int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
+                                    int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
+                                    int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
+                                    *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
+                                }
+                            }
+                        }
+                    }
+                    SDL_UnlockSurface(screen);
+                    SDL_Flip(screen);
+                    SDL_Delay(100);
+                    continue;
+                }
+            }
             for(int i = 0; i < rendererCount; i++)
             {
                 if(renderers[i] != nullptr)
@@ -340,9 +411,9 @@ int main()
                         continue;
                     }
                     renderers[i]->copyToBuffer(screenBuffer, ScreenWidth, ScreenHeight);
-                    for(int y=by; y<by+blockSize&&y<ScreenHeight; y++)
+                    for(int y = by; y < by + blockSize && y < ScreenHeight; y++)
                     {
-                        for(int x=bx; x<bx+blockSize&&x<ScreenWidth; x++)
+                        for(int x = bx; x < bx + blockSize && x < ScreenWidth; x++)
                         {
                             Color & c = screenBuffer[x + ScreenWidth * y];
                             int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
