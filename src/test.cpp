@@ -4,20 +4,22 @@
 #include <cstdlib>
 #include <thread>
 #include <atomic>
+#include <cstdio>
+#include <ctime>
 
 using namespace std;
 using namespace PathTrace;
 const bool multiThreaded = true;
 const int rendererCount = ([](int cpuCount)
 {
-    return cpuCount == 0 ? 4 : cpuCount;
+    return cpuCount == 0 ? 2 : cpuCount;
 })(thread::hardware_concurrency());
-const int rayCount = 20000;
-const int rayDepth = 4;
-const int ScreenWidth = 640, ScreenHeight = 480;
+const int rayCount = 50000;
+const int rayDepth = 32;
+const int ScreenWidth = 1024, ScreenHeight = 768;
 const char * const ProgramName = "Path Trace Test";
-const float minimumColorDelta = 0.005; // if the color change is less than this then we don't need to check inside this box
-const int blockSize = 256, maximumSampleSize = ScreenHeight / (480 / 8);
+const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
+const int blockSize = [](int count){int retval=512;while(retval>count&&retval>1)retval/=2;return retval;}(ScreenWidth), maximumSampleSize = ScreenHeight / (480 / 16);
 
 Object * unionArray(Object * array[], int start, int end)
 {
@@ -59,7 +61,7 @@ Object * makeWorld()
     static Material matEmitBrightW = Material(Color(0, 0, 0), 0, Color(40, 40, 40));
     static Material matDiffuseWhite = Material(Color(0.8, 0.8, 0.8), 1);
     static Material matGlass = Material(Color(0.7, 0.7, 0.7), 0, Color(0, 0, 0), Color(0.9, 0.9, 0.9), 1.3, 1);
-    static Material matDiamond = Material(Color(0.7, 0.7, 0.7), 0, Color(0, 0, 0), Color(0.95, 0.95, 0.95), 2.419, 1);
+    static Material matDiamond = Material(Color(0.9, 0.9, 0.9), 0, Color(0, 0, 0), Color(0.95, 0.95, 0.95), 2.419, 1);
     static Material matMirror = Material(Color(0.99, 0.99, 0.99), 0);
     Object * objects[] =
     {
@@ -204,6 +206,8 @@ private:
     }
     void renderSquare(int x, int y, int size, Color tl, Color tr, Color bl, Color br)
     {
+        if(x > ScreenWidth || y > ScreenHeight)
+            return;
         if(size <= 1)
         {
             setPixel(x, y, tl);
@@ -449,6 +453,9 @@ int main()
                         if(by >= ScreenHeight)
                         {
                             rendered = true;
+                            char fname[100];
+                            sprintf(fname, "image%08X.bmp", (unsigned)time(NULL));
+                            SDL_SaveBMP(screen, fname);
                         }
                     }
                 }
