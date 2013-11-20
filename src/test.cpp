@@ -12,14 +12,14 @@ using namespace PathTrace;
 const bool multiThreaded = true;
 const int rendererCount = ([](int cpuCount)
 {
-    return cpuCount == 0 ? 2 : cpuCount;
+    return cpuCount == 0 ? 4000 : cpuCount;
 })(thread::hardware_concurrency());
-const int rayCount = 50000;
-const int rayDepth = 32;
-const int ScreenWidth = 1024, ScreenHeight = 768;
+const int rayCount = 5000;
+const int rayDepth = 64;
+const int ScreenWidth = 320, ScreenHeight = 240;
 const char * const ProgramName = "Path Trace Test";
-const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
-const int blockSize = [](int count){int retval=512;while(retval>count&&retval>1)retval/=2;return retval;}(ScreenWidth), maximumSampleSize = ScreenHeight / (480 / 16);
+const float minimumColorDelta = 0.03; // if the color change is less than this then we don't need to check inside this box
+const int blockSize = [](int count){int retval=1024;while(retval>count&&retval>4)retval/=2;return retval/4;}(ScreenWidth), maximumSampleSize = ScreenHeight / (480 / 16);
 
 Object * unionArray(Object * array[], int start, int end)
 {
@@ -193,7 +193,7 @@ private:
     }
     Color calcPixelColor(int x, int y)
     {
-        if(x >= xOrigin && x <= size && y >= yOrigin && y <= size)
+        if(x >= xOrigin && x <= xOrigin + size && y >= yOrigin && y <= yOrigin + size)
         {
             if(validPixel(x, y))
             {
