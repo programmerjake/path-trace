@@ -14,12 +14,12 @@ const int rendererCount = ([](int cpuCount)
 {
     return cpuCount == 0 ? 4000 : cpuCount * 8;
 })(thread::hardware_concurrency());
-const int rayCount = 5000;
+const int rayCount = 100000;
 const int rayDepth = 64;
-const int ScreenWidth = 640, ScreenHeight = 480;
+const int ScreenWidth = 1680, ScreenHeight = 1050;
 const char * const ProgramName = "Path Trace Test";
-const float minimumColorDelta = 0.03; // if the color change is less than this then we don't need to check inside this box
-const int blockSize = [](int count){int retval=1024;while(retval>count&&retval>4)retval/=2;return retval/4;}(ScreenWidth), maximumSampleSize = ScreenHeight / (480 / 16);
+const float minimumColorDelta = 0.0015; // if the color change is less than this then we don't need to check inside this box
+const int blockSize = [](int count){int retval=1024;while(retval>count&&retval>4)retval/=2;return retval/4;}(ScreenWidth/4), maximumSampleSize = ScreenHeight / (480 / 8);
 
 Object * unionArray(Object * array[], int start, int end)
 {
@@ -200,7 +200,7 @@ private:
                 return pixel(x, y);
             }
         }
-        Color retval = tracePixel(*spanIterator, x, y, ScreenWidth, ScreenHeight, rayCount, rayDepth);
+        Color retval = tracePixel(*spanIterator, x, y, ScreenWidth, ScreenHeight, rayCount, rayDepth, ScreenWidth, ScreenHeight, min(ScreenWidth, ScreenHeight));
         setPixel(x, y, retval);
         return retval;
     }
@@ -259,19 +259,39 @@ private:
 };
 }
 
-int main()
+int main(int argc, char ** argv)
 {
-    if(SDL_Init(SDL_INIT_VIDEO) != 0)
+    if(argc == 2)
+    {
+        if(argv[1] == string("-h") || argv[1] == string("--help"))
+        {
+            cout << "usage: path-trace [--novideo]\n";
+            return EXIT_SUCCESS;
+        }
+    }
+    bool useVideo = true;
+    if(argc >= 2 && string(argv[1]) == "--novideo")
+        useVideo = false;
+    if(SDL_Init(useVideo ? SDL_INIT_VIDEO : 0) != 0)
     {
         cerr << "\nUnable to initialize SDL:  " << SDL_GetError() << endl;
         return EXIT_FAILURE;
     }
     atexit(SDL_Quit);
-    SDL_Surface * screen = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 32, SDL_SWSURFACE);
+    SDL_Surface * screen = NULL;
+    if(useVideo)
+        screen = SDL_SetVideoMode(ScreenWidth, ScreenHeight, 32, SDL_SWSURFACE);
     if(screen == NULL)
     {
-        cerr << "\nUnable to set video mode:  " << SDL_GetError() << endl;
-        return EXIT_FAILURE;
+        if(useVideo)
+            cerr << "\nUnable to set video mode:  " << SDL_GetError() << endl;
+        useVideo = false;
+        screen = SDL_CreateRGBSurface(SDL_SWSURFACE, ScreenWidth, ScreenHeight, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
+        if(screen == NULL)
+        {
+            cerr << "\nUnable to create surface:  " << SDL_GetError() << endl;
+            return EXIT_FAILURE;
+        }
     }
 
     bool done = false;
@@ -293,10 +313,13 @@ int main()
         }
     }
     SDL_UnlockSurface(screen);
-    SDL_Flip(screen);
+    if(useVideo)
+    {
+        SDL_Flip(screen);
+        SDL_WM_SetCaption(ProgramName, NULL);
+    }
     Object * const world = makeWorld();
     AutoDestruct<Object> autoDestruct1(world);
-    SDL_WM_SetCaption(ProgramName, NULL);
     RenderBlock * renderers[rendererCount];
     bool renderedAllBlocks = true;
     while(!done)
@@ -304,6 +327,12 @@ int main()
         SDL_Event event;
         while(!done)
         {
+            if(!useVideo)
+            {
+                if(rendered)
+                    done = true;
+                break;
+            }
             if(rendered)
             {
                 if(!SDL_WaitEvent(&event))
@@ -385,17 +414,17 @@ int main()
                         if(renderers[i] != nullptr)
                         {
                             renderers[i]->copyToBuffer(screenBuffer, ScreenWidth, ScreenHeight);
-                            for(int y = tempY; y < tempY + blockSize && y < ScreenHeight; y++)
-                            {
-                                for(int x = tempX; x < tempX + blockSize && x < ScreenWidth; x++)
+                                for(int y = tempY; y < tempY + blockSize && y < ScreenHeight; y++)
                                 {
-                                    Color & c = screenBuffer[x + ScreenWidth * y];
-                                    int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
-                                    int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
-                                    int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
-                                    *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
+                                    for(int x = tempX; x < tempX + blockSize && x < ScreenWidth; x++)
+                                    {
+                                        Color & c = screenBuffer[x + ScreenWidth * y];
+                                        int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
+                                        int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
+                                        int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
+                                        *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
+                                    }
                                 }
-                            }
                         }
                         tempX += blockSize;
                         if(tempX >= ScreenWidth)
@@ -409,7 +438,10 @@ int main()
                         }
                     }
                     SDL_UnlockSurface(screen);
-                    SDL_Flip(screen);
+                    if(useVideo)
+                    {
+                        SDL_Flip(screen);
+                    }
                     SDL_Delay(100);
                     continue;
                 }
@@ -433,16 +465,16 @@ int main()
                         continue;
                     }
                     renderers[i]->copyToBuffer(screenBuffer, ScreenWidth, ScreenHeight);
-                    for(int y = by; y < by + blockSize && y < ScreenHeight; y++)
-                    {
-                        for(int x = bx; x < bx + blockSize && x < ScreenWidth; x++)
+                        for(int y = by; y < by + blockSize && y < ScreenHeight; y++)
                         {
-                            Color & c = screenBuffer[x + ScreenWidth * y];
-                            int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
-                            int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
-                            int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
-                            *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
-                        }
+                            for(int x = bx; x < bx + blockSize && x < ScreenWidth; x++)
+                            {
+                                Color & c = screenBuffer[x + ScreenWidth * y];
+                                int r = max(0, min(0xFF, (int)floor(0x100 * c.x / count)));
+                                int g = max(0, min(0xFF, (int)floor(0x100 * c.y / count)));
+                                int b = max(0, min(0xFF, (int)floor(0x100 * c.z / count)));
+                                *(Uint32 *)((Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel) = SDL_MapRGB(screen->format, r, g, b);
+                            }
                     }
                     delete renderers[i];
                     bx += blockSize;
@@ -461,7 +493,19 @@ int main()
                 }
             }
             SDL_UnlockSurface(screen);
-            SDL_Flip(screen);
+            if(useVideo)
+            {
+                SDL_Flip(screen);
+            }
+            else
+            {
+                static int dotCount = 0;
+                cout << "rendering.";
+                for(int i = dotCount++; i >= 0; i++)
+                    cout << ".";
+                cout << "\x1B[K\r";
+                dotCount %= 15;
+            }
         }
     }
     return EXIT_SUCCESS;
