@@ -1,0 +1,287 @@
+# depslib dependency file v1.0
+1384316078 source:/home/lifsja/path-trace/src/color.cpp
+	"color.h"
+
+1384316036 /home/lifsja/path-trace/include/color.h
+	"vector3d.h"
+
+1384216686 source:/home/lifsja/path-trace/src/material.cpp
+	"material.h"
+
+1384541576 /home/lifsja/path-trace/include/material.h
+	"color.h"
+
+1384210405 source:/home/lifsja/path-trace/src/object.cpp
+	"object.h"
+
+1391065691 /home/lifsja/path-trace/include/object.h
+	"span.h"
+	"ray.h"
+
+1384736898 /home/lifsja/path-trace/include/span.h
+	"vector3d.h"
+	"material.h"
+	"ray.h"
+
+1384736898 /home/lifsja/path-trace/include/vector3d.h
+	<cmath>
+	<random>
+	<assert.h>
+	<iostream>
+	"misc.h"
+
+1384736898 /home/lifsja/path-trace/include/path-trace.h
+	"misc.h"
+	"vector3d.h"
+	"span.h"
+	"ray.h"
+	"material.h"
+	"object.h"
+	"sphere.h"
+	"union.h"
+	"plane.h"
+	"intersection.h"
+	"difference.h"
+	<random>
+	<cstdint>
+
+1384541576 /home/lifsja/path-trace/include/ray.h
+	"vector3d.h"
+
+1384548426 /home/lifsja/path-trace/include/misc.h
+
+1384210771 source:/home/lifsja/path-trace/src/span.cpp
+	"span.h"
+
+1384541576 source:/home/lifsja/path-trace/src/sphere.cpp
+	"sphere.h"
+
+1384541576 /home/lifsja/path-trace/include/sphere.h
+	"object.h"
+
+1384215239 source:/home/lifsja/path-trace/src/vector3d.cpp
+	"vector3d.h"
+
+1391065615 source:/home/lifsja/path-trace/src/test.cpp
+	"path-trace.h"
+	<SDL.h>
+	<iostream>
+	<cstdlib>
+	<thread>
+	<atomic>
+	<cstdio>
+	<ctime>
+
+1327665706 /usr/include/SDL/SDL.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_config.h
+	"SDL_platform.h"
+	<stdarg.h>
+
+1327665706 /usr/include/SDL/SDL_platform.h
+
+1327665706 /usr/include/SDL/begin_code.h
+
+1327665706 /usr/include/SDL/close_code.h
+
+1327665706 /usr/include/SDL/SDL_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_endian.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_keysym.h
+
+1327665706 /usr/include/SDL/SDL_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1327665706 /usr/include/SDL/SDL_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1327665706 /usr/include/SDL/SDL_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1384391964 source:/home/lifsja/path-trace/src/path-trace.cpp
+	"path-trace.h"
+
+1384540466 source:/home/lifsja/path-trace/src/union.cpp
+	"union.h"
+
+1384540465 /home/lifsja/path-trace/include/union.h
+	"object.h"
+
+1384547549 source:/home/lifsja/path-trace/src/plane.cpp
+	"plane.h"
+
+1384547514 /home/lifsja/path-trace/include/plane.h
+	"object.h"
+
+1384736898 /home/lifsja/path-trace/include/intersection.h
+	"object.h"
+
+1384736898 /home/lifsja/path-trace/include/difference.h
+	"object.h"
+
+1384736898 source:/home/lifsja/path-trace/src/difference.cpp
+	"difference.h"
+
+1384736898 source:/home/lifsja/path-trace/src/intersection.cpp
+	"intersection.h"
+
+1384740016 source:/home/lifsja/path-trace/src/transform.cpp
+	"transform.h"
+
+1384740002 /home/lifsja/path-trace/include/transform.h
+	"vector3d.h"
+

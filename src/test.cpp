@@ -12,11 +12,11 @@ using namespace PathTrace;
 const bool multiThreaded = true;
 const int rendererCount = ([](int cpuCount)
 {
-    return cpuCount == 0 ? 4000 : cpuCount;
+    return cpuCount == 0 ? 4000 : cpuCount * 8;
 })(thread::hardware_concurrency());
 const int rayCount = 5000;
 const int rayDepth = 64;
-const int ScreenWidth = 320, ScreenHeight = 240;
+const int ScreenWidth = 640, ScreenHeight = 480;
 const char * const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 0.03; // if the color change is less than this then we don't need to check inside this box
 const int blockSize = [](int count){int retval=1024;while(retval>count&&retval>4)retval/=2;return retval/4;}(ScreenWidth), maximumSampleSize = ScreenHeight / (480 / 16);

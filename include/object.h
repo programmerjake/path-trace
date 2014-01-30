@@ -12,6 +12,7 @@ class Object
 public:
     Object();
     virtual SpanIterator * makeSpanIterator() const = 0;
+    virtual ~Object() {}
 protected:
 private:
 };
