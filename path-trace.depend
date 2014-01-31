@@ -62,7 +62,7 @@
 1384215239 source:/home/lifsja/path-trace/src/vector3d.cpp
 	"vector3d.h"
 
-1391104597 source:/home/lifsja/path-trace/src/test.cpp
+1391149005 source:/home/lifsja/path-trace/src/test.cpp
 	"path-trace.h"
 	<SDL.h>
 	<iostream>
@@ -71,6 +71,9 @@
 	<atomic>
 	<cstdio>
 	<ctime>
+	<vector>
+	<mutex>
+	<condition_variable>
 
 1327665706 /usr/include/SDL/SDL.h
 	"SDL_main.h"
