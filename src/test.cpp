@@ -1,5 +1,7 @@
 #include "path-trace.h"
+#ifndef SERVER_ONLY
 #include <SDL.h>
+#endif
 #include <iostream>
 #include <cstdlib>
 #include <thread>
@@ -22,9 +24,9 @@ using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
 const int rendererCount = 1000;
-const int rayCount = 1000;
+const int rayCount = 1000000;
 const int rayDepth = 16;
-const int ScreenWidth = 1920 / 10, ScreenHeight = 1080 / 10;
+const int ScreenWidth = 1920, ScreenHeight = 1080;
 const char *const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 1 / 300.0; // if the color change is less than this then we don't need to check inside this box
 const int blockSize = [](int count)
@@ -732,7 +734,12 @@ void client(vector<string> addresses)
     NetRenderBlock::addresses = addresses;
     isNetworkClient = true;
 }
-
+#ifdef SERVER_ONLY
+int main()
+{
+    return server();
+}
+#else
 int main(int argc, char **argv)
 {
     signal(SIGPIPE, SIG_IGN);
@@ -1012,4 +1019,4 @@ int main(int argc, char **argv)
     }
     return EXIT_SUCCESS;
 }
-
+#endif // SERVER_ONLY
