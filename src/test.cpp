@@ -4,32 +4,34 @@
 #endif
 #include <iostream>
 #include <cstdlib>
-#include <thread>
-#include <atomic>
+#include "thread.h"
+#include "mutex.h"
+#include "atomic.h"
 #include <cstdio>
 #include <ctime>
 #include <vector>
-#include <mutex>
 #include <sstream>
-#include <condition_variable>
+#include "condition_variable.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <cstring>
 #include <signal.h>
+#include <errno.h>
 
 using namespace std;
 using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
 const int rendererCount = 1000;
-const int rayCount = 1000000;
+const int rayCount = 1000;
 const int rayDepth = 16;
-const int ScreenWidth = 1920, ScreenHeight = 1080;
+const int ScreenWidth = 1920 / 10, ScreenHeight = 1080 / 10;
 const char *const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 1 / 300.0; // if the color change is less than this then we don't need to check inside this box
-const int blockSize = [](int count)
+
+static int getBlockSize(int count)
 {
     int retval = 1024;
     while(retval > count && retval > 4)
@@ -37,7 +39,9 @@ const int blockSize = [](int count)
         retval /= 2;
     }
     return retval / 4;
-}(ScreenWidth / 2), maximumSampleSize = ScreenHeight / (480 / 8);
+}
+
+const int blockSize = getBlockSize(ScreenWidth / 2), maximumSampleSize = ScreenHeight / (480 / 8);
 
 Object *unionArray(Object *array[], int start, int end)
 {
@@ -178,8 +182,8 @@ private:
         }
         doingInit.unlock();
     }
-    Runnable(const Runnable &) = delete;
-    const Runnable &operator =(const Runnable &) = delete;
+    Runnable(const Runnable &);
+    const Runnable &operator =(const Runnable &);
 public:
     Runnable()
     {
@@ -271,8 +275,8 @@ mutex Runnable::listMutex, Runnable::doingInit;
 
 class BlockRenderer
 {
-    const BlockRenderer & operator =(const BlockRenderer &) = delete;
-    BlockRenderer(const BlockRenderer &) = delete;
+    const BlockRenderer & operator =(const BlockRenderer &);
+    BlockRenderer(const BlockRenderer &);
 public:
     BlockRenderer()
     {
@@ -579,7 +583,7 @@ public:
         {
             vBuffer[i] = false;
         }
-        th = nullptr;
+        th = NULL;
 #if 0
         threadFn(this);
 #else
@@ -626,7 +630,7 @@ void serverThreadFn(int fd)
     static atomic_int running_count(0);
     FILE *f2 = fdopen(dup(fd), "r");
     FILE *f = fdopen(fd, "w");
-    if(running_count.fetch_add(1) >= Runnable::getThreadCount() * 2)
+    if(running_count++ >= Runnable::getThreadCount() * 2)
     {
         running_count--;
         fprintf(f, "0\n");
@@ -652,7 +656,7 @@ void serverThreadFn(int fd)
     while(!rb->done())
     {
         rb->copyToSocket(f);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        this_thread::sleep_for(chrono::seconds(1));
     }
     rb->copyToSocket(f);
     fprintf(f, "F\n");
@@ -678,7 +682,7 @@ int server()
     }
     int fd = -1;
     const char *errorStr = "getaddrinfo";
-    for(addrinfo *addr = addrList; addr != nullptr; addr = addr->ai_next)
+    for(addrinfo *addr = addrList; addr != NULL; addr = addr->ai_next)
     {
         fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
         errorStr = "socket";
@@ -900,7 +904,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        renderers[i] = nullptr;
+                        renderers[i] = NULL;
                     }
                 }
             }
@@ -909,7 +913,7 @@ int main(int argc, char **argv)
                 renderedAllBlocks = true;
                 for(int i = 0; i < rendererCount; i++)
                 {
-                    if(renderers[i] != nullptr)
+                    if(renderers[i] != NULL)
                     {
                         if(!renderers[i]->done())
                         {
@@ -925,7 +929,7 @@ int main(int argc, char **argv)
                     int tempX = bx, tempY = by;
                     for(int i = 0; i < rendererCount; i++)
                     {
-                        if(renderers[i] != nullptr)
+                        if(renderers[i] != NULL)
                         {
                             renderers[i]->copyToBuffer(screenBuffer, ScreenWidth, ScreenHeight);
                             for(int y = tempY; y < tempY + blockSize && y < ScreenHeight; y++)
@@ -964,7 +968,7 @@ int main(int argc, char **argv)
                 ;
             for(int i = 0; i < rendererCount; i++)
             {
-                if(renderers[i] != nullptr)
+                if(renderers[i] != NULL)
                 {
                     if(rendered)
                     {

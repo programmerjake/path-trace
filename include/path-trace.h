@@ -12,8 +12,8 @@
 #include "plane.h"
 #include "intersection.h"
 #include "difference.h"
-#include <random>
-#include <cstdint>
+//#include <random>
+#include <stdint.h>
 
 namespace PathTrace
 {
@@ -48,12 +48,12 @@ public:
             operator()();
     }
 private:
-    std::uint64_t v;
+    uint64_t v;
 };
 
 extern DefaultRandomEngine defaultRandomEngine;
 const int DefaultRayDepth = 16;
-template <typename T = DefaultRandomEngine>
+template <typename T>
 inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine, float strength = 1.0)
 {
     spanIterator.init(ray);
@@ -72,7 +72,7 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
             t = spanIterator->start;
             normal = spanIterator->startNormal;
             material = spanIterator->startMaterial;
-            assert(material != nullptr);
+            assert(material != NULL);
             assert(material->ior > eps);
             ior = 1.0 / material->ior;
             break;
@@ -86,7 +86,7 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
             t = spanIterator->end;
             normal = -spanIterator->endNormal;
             material = spanIterator->endMaterial;
-            assert(material != nullptr);
+            assert(material != NULL);
             assert(material->ior > eps);
             ior = material->ior;
             break;
@@ -102,7 +102,7 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
     {
         return retval;
     }
-    std::uniform_real_distribution<float> zeroToOne(0, 1);
+    uniform_real_distribution<float> zeroToOne(0, 1);
     if(zeroToOne(randomEngine) < material->transmit_reflect_coefficient * ray.dir.refractStrength(ior, normal)) // transmit
     {
         Vector3D refractedRayDir = ray.dir.refract(ior, normal);
@@ -147,7 +147,7 @@ const float DefaultScreenWidth = 4.0 / 3.0;
 const float DefaultScreenHeight = 1.0;
 const float DefaultScreenDistance = 2.0;
 
-template <typename T = DefaultRandomEngine>
+template <typename T>
 inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float screenXResolution, float screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
 {
     float x = 2 * px / screenXResolution - 1;
@@ -162,10 +162,10 @@ inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float s
     return retval;
 }
 
-template <typename T = DefaultRandomEngine>
-inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
+template <typename T>
+inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount, int rayDepth, float screenWidth, float screenHeight, float screenDistance, T & randomEngine)
 {
-    std::uniform_real_distribution<float> zeroToOne(0, 1);
+    uniform_real_distribution<float> zeroToOne(0, 1);
     Color retval = Color(0, 0, 0);
     for(int i = 0; i < sampleCount; i++)
     {
@@ -176,6 +176,11 @@ inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenX
     }
     retval /= sampleCount;
     return retval;
+}
+
+inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance)
+{
+    return tracePixel(spanIterator, px, py, screenXResolution, screenYResolution, sampleCount, rayDepth, screenWidth, screenHeight, screenDistance, defaultRandomEngine);
 }
 }
 

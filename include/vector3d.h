@@ -2,13 +2,36 @@
 #define VECTOR3D_H
 
 #include <cmath>
-#include <random>
+//#include <random>
 #include <assert.h>
 #include <iostream>
+#include <stdint.h>
 #include "misc.h"
 
 namespace PathTrace
 {
+
+template <typename T>
+class uniform_real_distribution
+{
+private:
+    T min, max;
+public:
+    uniform_real_distribution(T min, T max)
+        : min(min), max(max)
+    {
+    }
+    template <typename RG>
+    T operator()(RG & rg) const
+    {
+        T retval = rg();
+        retval -= rg.min();
+        retval /= rg.max() - rg.min();
+        retval *= max - min;
+        retval += min;
+        return retval;
+    }
+};
 
 class Vector3D
 {
@@ -138,7 +161,7 @@ public:
         assert(min <= max || min == 0);
         if(max == 0)
             return Vector3D(0, 0, 0);
-        std::uniform_real_distribution<float> distribution(-max,max);
+        uniform_real_distribution<float> distribution(-max,max);
         Vector3D retval;
         float mag;
         do

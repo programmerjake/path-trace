@@ -22,10 +22,10 @@ public:
     {
         start = 0;
         startNormal = Vector3D(0, 0, 0);
-        startMaterial = nullptr;
+        startMaterial = NULL;
         end = 0;
         endNormal = Vector3D(0, 0, 0);
-        endMaterial = nullptr;
+        endMaterial = NULL;
     }
 
     Span(float start, Vector3D startNormal, const Material * startMaterial, float end, Vector3D endNormal, const Material * endMaterial)
