@@ -25,9 +25,9 @@ using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
 const int rendererCount = 1000;
-const int rayCount = 1000;
+const int rayCount = 1000000;
 const int rayDepth = 16;
-const int ScreenWidth = 1920 / 10, ScreenHeight = 1080 / 10;
+const int ScreenWidth = 1920, ScreenHeight = 1080;
 const char *const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 1 / 300.0; // if the color change is less than this then we don't need to check inside this box
 
@@ -262,6 +262,7 @@ public:
     }
     static int getThreadCount()
     {
+        doInit();
         return threadCount;
     }
 };
