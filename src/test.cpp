@@ -284,7 +284,7 @@ public:
     }
 };
 
-class RenderBlock final : public Runnable, public BlockRenderer
+class RenderBlock : public Runnable, public BlockRenderer
 {
 public:
     RenderBlock(const int x, const int y, int size, const Object *world)
@@ -305,7 +305,7 @@ public:
         join();
         ran_finish = true;
     }
-    bool done() override
+    bool done()
     {
         if(ran_finish)
         {
@@ -317,7 +317,7 @@ public:
         }
         return false;
     }
-    void copyToBuffer(Color *screenBuffer, int w, int h) override
+    void copyToBuffer(Color *screenBuffer, int w, int h)
     {
         for(int y = yOrigin; y < yOrigin + size && y < h; y++)
         {
@@ -449,7 +449,7 @@ private:
         renderSquare(cx, cy, halfSize, cc, cr, bc, br);
     }
 protected:
-    virtual void run() override
+    virtual void run()
     {
         spanIterator = world->makeSpanIterator();
         renderSquare(xOrigin, yOrigin, size, calcPixelColor(xOrigin, yOrigin), calcPixelColor(xOrigin + size, yOrigin), calcPixelColor(xOrigin, yOrigin + size), calcPixelColor(xOrigin + size, yOrigin + size));
@@ -467,13 +467,13 @@ private:
     atomic_bool finished;
 };
 
-class NetRenderBlock final : public BlockRenderer
+class NetRenderBlock : public BlockRenderer
 {
 private:
     const int x, y, size;
     Color * const cBuffer;
     bool * const vBuffer;
-    volatile bool finished = false;
+    volatile bool finished;
     mutex bufferMutex;
     thread * th;
     static vector<string> addresses;
@@ -573,7 +573,7 @@ private:
     }
 public:
     NetRenderBlock(int x, int y, int size)
-        : x(x), y(y), size(size), cBuffer(new Color[size * size]), vBuffer(new bool[size * size])
+        : x(x), y(y), size(size), cBuffer(new Color[size * size]), vBuffer(new bool[size * size]), finished(false)
     {
         for(int i = 0; i < size * size; i++)
         {
@@ -586,11 +586,11 @@ public:
         th = new thread(threadFn, this);
 #endif
     }
-    bool done() override
+    bool done()
     {
         return finished;
     }
-    void copyToBuffer(Color *screenBuffer, int w, int h) override
+    void copyToBuffer(Color *screenBuffer, int w, int h)
     {
         bufferMutex.lock();
         for(int py = y; py < y + size && py < h; py++)
@@ -688,7 +688,7 @@ int server()
         }
         int opt = 1;
         setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int));
-        if(bind(fd, addr->ai_addr, addr->ai_addrlen) == 0)
+        if(::bind(fd, addr->ai_addr, addr->ai_addrlen) == 0)
         {
             break;
         }
