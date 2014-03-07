@@ -37,15 +37,17 @@ public:
     {
         v = newValue ^ 0x12476242;
     }
-    unsigned operator ()()
+    unsigned operator()()
     {
         v = (214013 * v + 2531011);
         return (unsigned)(v >> 32);
     }
     void discard(unsigned long long count)
     {
-        for(unsigned long long i=0; i<count;i++)
+        for(unsigned long long i = 0; i < count; i++)
+        {
             operator()();
+        }
     }
 private:
     uint64_t v;
@@ -54,11 +56,11 @@ private:
 extern DefaultRandomEngine defaultRandomEngine;
 const int DefaultRayDepth = 16;
 template <typename T>
-inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = DefaultRayDepth, T & randomEngine = defaultRandomEngine, float strength = 1.0)
+inline Color traceRay(const Ray &ray, SpanIterator &spanIterator, int depth = DefaultRayDepth, T &randomEngine = defaultRandomEngine, float strength = 1.0)
 {
     spanIterator.init(ray);
     float t = -1;
-    const Material * material;
+    const Material *material;
     Vector3D normal;
     float ior = 1;
     for(; spanIterator; spanIterator++)
@@ -98,48 +100,64 @@ inline Color traceRay(const Ray & ray, SpanIterator & spanIterator, int depth = 
     }
     //ior = 1 / ior;
     Color retval = material->emissive;
-    if(depth <= 0 || strength < 0.02)
+    float addFactor = 1;
+    if(depth <= 0 || strength < eps)
     {
         return retval;
     }
-    uniform_real_distribution<float> zeroToOne(0, 1);
-    if(zeroToOne(randomEngine) < material->transmit_reflect_coefficient * ray.dir.refractStrength(ior, normal)) // transmit
+    //uniform_real_distribution<float> zeroToOne(0, 1);
+    float refractFactor = material->transmit_reflect_coefficient * ray.dir.refractStrength(ior, normal);
+    if(refractFactor > eps) // transmit
     {
         Vector3D refractedRayDir = ray.dir.refract(ior, normal);
         if(refractedRayDir != Vector3D(0, 0, 0))
         {
             Ray newRay = Ray(ray.getPoint(t), refractedRayDir);
-            retval += material->transmit * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * abs(material->transmit));
-            return retval;
+            retval += addFactor * refractFactor * material->transmit * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * refractFactor * addFactor * abs(material->transmit));
+            addFactor *= 1 - refractFactor;
         }
+    }
+    if(addFactor < eps)
+    {
+        return retval;
     }
 
     // diffuse/specular reflect
-
-    Vector3D reflectedRayDir = ray.dir.reflect(normal);
-    Vector3D resultingRayDir = reflectedRayDir;
-    assert(material->scatter_coefficient >= 0 && material->scatter_coefficient <= 1);
-    if(material->scatter_coefficient > eps)
+    int scatter_ray_count = 1000 * strength;
+    if(material->scatter_coefficient <= eps)
     {
-        int count = 0;
-        do
-        {
-            count++;
-            assert(count <= 1000);
-            if(count > 1000)
-            {
-                return retval;
-            }
-            resultingRayDir = Vector3D::rand(randomEngine, 1, 0);
-            resultingRayDir += (1 / material->scatter_coefficient - 1) * reflectedRayDir;
-        }
-        while(dot(normal, resultingRayDir) <= eps);
-        resultingRayDir = normalize(resultingRayDir);
+        scatter_ray_count = 1;
     }
+    if(scatter_ray_count == 0)
+        scatter_ray_count = 1;
+    for(int i = 0; i < scatter_ray_count; i++)
+    {
+        Vector3D reflectedRayDir = ray.dir.reflect(normal);
+        Vector3D resultingRayDir = reflectedRayDir;
+        assert(material->scatter_coefficient >= 0 && material->scatter_coefficient <= 1);
+        if(material->scatter_coefficient > eps)
+        {
+            int count = 0;
+            do
+            {
+                count++;
+                assert(count <= 1000);
+                if(count > 1000)
+                {
+                    return retval;
+                }
+                resultingRayDir = Vector3D::rand(randomEngine, 1, 0);
+                resultingRayDir += (1 / material->scatter_coefficient - 1) * reflectedRayDir;
+            }
+            while(dot(normal, resultingRayDir) <= eps);
+            resultingRayDir = normalize(resultingRayDir);
+        }
 
-    float factor = 1 - (1 - dot(resultingRayDir, normal)) * material->scatter_coefficient;
-    Ray newRay = Ray(ray.getPoint(t), resultingRayDir);
-    return retval + factor * material->reflect * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * factor * abs(material->reflect));
+        float factor = 1 - (1 - dot(resultingRayDir, normal)) * material->scatter_coefficient;
+        Ray newRay = Ray(ray.getPoint(t), resultingRayDir);
+        retval += addFactor / scatter_ray_count * factor * material->reflect * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength / scatter_ray_count * addFactor * factor * abs(material->reflect));
+    }
+    return retval;
 }
 
 const int DefaultSampleCount = 200;
@@ -148,7 +166,7 @@ const float DefaultScreenHeight = 1.0;
 const float DefaultScreenDistance = 2.0;
 
 template <typename T>
-inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float screenXResolution, float screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T & randomEngine = defaultRandomEngine)
+inline Color tracePixel(SpanIterator &spanIterator, float px, float py, float screenXResolution, float screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance, T &randomEngine = defaultRandomEngine)
 {
     float x = 2 * px / screenXResolution - 1;
     float y = 1 - 2 * py / screenYResolution;
@@ -163,7 +181,7 @@ inline Color tracePixel(SpanIterator & spanIterator, float px, float py, float s
 }
 
 template <typename T>
-inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount, int rayDepth, float screenWidth, float screenHeight, float screenDistance, T & randomEngine)
+inline Color tracePixel(SpanIterator &spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount, int rayDepth, float screenWidth, float screenHeight, float screenDistance, T &randomEngine)
 {
     uniform_real_distribution<float> zeroToOne(0, 1);
     Color retval = Color(0, 0, 0);
@@ -178,7 +196,7 @@ inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenX
     return retval;
 }
 
-inline Color tracePixel(SpanIterator & spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance)
+inline Color tracePixel(SpanIterator &spanIterator, int px, int py, int screenXResolution, int screenYResolution, int sampleCount = DefaultSampleCount, int rayDepth = DefaultRayDepth, float screenWidth = DefaultScreenWidth, float screenHeight = DefaultScreenHeight, float screenDistance = DefaultScreenDistance)
 {
     return tracePixel(spanIterator, px, py, screenXResolution, screenYResolution, sampleCount, rayDepth, screenWidth, screenHeight, screenDistance, defaultRandomEngine);
 }

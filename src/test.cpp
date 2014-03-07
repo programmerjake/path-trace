@@ -25,11 +25,11 @@ using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
 const int rendererCount = 1000;
-const int rayCount = 1000000;
+const int rayCount = 100;
 const int rayDepth = 16;
 const int ScreenWidth = 1920, ScreenHeight = 1080;
 const char *const ProgramName = "Path Trace Test";
-const float minimumColorDelta = 1 / 300.0; // if the color change is less than this then we don't need to check inside this box
+const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
 
 static int getBlockSize(int count)
 {
@@ -41,7 +41,7 @@ static int getBlockSize(int count)
     return retval / 4;
 }
 
-const int blockSize = getBlockSize(ScreenWidth / 2), maximumSampleSize = ScreenHeight / (480 / 8);
+const int blockSize = getBlockSize(ScreenWidth / 2), maximumSampleSize = ScreenHeight / (480 / 4);
 
 Object *unionArray(Object *array[], int start, int end)
 {
@@ -493,6 +493,13 @@ private:
     bool run()
     {
         string address = addresses[rand() % addresses.size()];
+        string port = NET_PORT;
+        size_t pos = address.find_last_of(':');
+        if(pos != string::npos)
+        {
+            port = address.substr(pos + 1);
+            address = address.substr(0, pos);
+        }
         addrinfo hints;
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_UNSPEC;
@@ -500,7 +507,7 @@ private:
         hints.ai_flags = 0;
         hints.ai_protocol = 0;
         addrinfo * addrList;
-        int retval = getaddrinfo(address.c_str(), NET_PORT, &hints, &addrList);
+        int retval = getaddrinfo(address.c_str(), port.c_str(), &hints, &addrList);
         if (0 != retval)
         {
             fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval));

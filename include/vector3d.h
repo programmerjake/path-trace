@@ -25,8 +25,8 @@ public:
     T operator()(RG & rg) const
     {
         T retval = rg();
-        retval -= rg.min();
-        retval /= rg.max() - rg.min();
+        retval -= (int64_t)rg.min();
+        retval /= (int64_t)rg.max() - (int64_t)rg.min();
         retval *= max - min;
         retval += min;
         return retval;
