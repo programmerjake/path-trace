@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="path-trace" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/path-trace" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="--server" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/path-trace" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-march=k8" />
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="include" />
+			<Add directory="/usr/include/SDL" />
+		</Compiler>
+		<Linker>
+			<Add library="SDL" />
+			<Add library="pthread" />
+			<Add library="rt" />
+		</Linker>
+		<Unit filename="include/atomic.h" />
+		<Unit filename="include/color.h" />
+		<Unit filename="include/condition_variable.h" />
+		<Unit filename="include/difference.h" />
+		<Unit filename="include/intersection.h" />
+		<Unit filename="include/material.h" />
+		<Unit filename="include/misc.h" />
+		<Unit filename="include/mutex.h" />
+		<Unit filename="include/object.h" />
+		<Unit filename="include/path-trace.h" />
+		<Unit filename="include/plane.h" />
+		<Unit filename="include/ray.h" />
+		<Unit filename="include/span.h" />
+		<Unit filename="include/sphere.h" />
+		<Unit filename="include/thread.h" />
+		<Unit filename="include/transform.h" />
+		<Unit filename="include/union.h" />
+		<Unit filename="include/vector3d.h" />
+		<Unit filename="src/color.cpp" />
+		<Unit filename="src/difference.cpp" />
+		<Unit filename="src/intersection.cpp" />
+		<Unit filename="src/material.cpp" />
+		<Unit filename="src/object.cpp" />
+		<Unit filename="src/path-trace.cpp" />
+		<Unit filename="src/plane.cpp" />
+		<Unit filename="src/span.cpp" />
+		<Unit filename="src/sphere.cpp" />
+		<Unit filename="src/test.cpp" />
+		<Unit filename="src/transform.cpp" />
+		<Unit filename="src/union.cpp" />
+		<Unit filename="src/vector3d.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
