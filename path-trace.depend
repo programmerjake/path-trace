@@ -411,58 +411,58 @@
 1391635872 source:/home/jacob/projects/path-trace/src/vector3d.cpp
 	"vector3d.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/color.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/color.cpp
 	"color.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/color.h
+1394227623 /home/jacob.lifshay/path-trace/include/color.h
 	"vector3d.h"
 
-1391648113 /home/jacob.lifshay/path-trace/include/vector3d.h
+1394227623 /home/jacob.lifshay/path-trace/include/vector3d.h
 	<cmath>
 	<assert.h>
 	<iostream>
 	<stdint.h>
 	"misc.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/misc.h
+1394227623 /home/jacob.lifshay/path-trace/include/misc.h
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/difference.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/difference.cpp
 	"difference.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/difference.h
+1394227623 /home/jacob.lifshay/path-trace/include/difference.h
 	"object.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/object.h
+1394227623 /home/jacob.lifshay/path-trace/include/object.h
 	"span.h"
 	"ray.h"
 
-1391648137 /home/jacob.lifshay/path-trace/include/span.h
+1394227623 /home/jacob.lifshay/path-trace/include/span.h
 	"vector3d.h"
 	"material.h"
 	"ray.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/material.h
+1394227623 /home/jacob.lifshay/path-trace/include/material.h
 	"color.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/ray.h
+1394227623 /home/jacob.lifshay/path-trace/include/ray.h
 	"vector3d.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/intersection.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/intersection.cpp
 	"intersection.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/intersection.h
+1394227623 /home/jacob.lifshay/path-trace/include/intersection.h
 	"object.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/material.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/material.cpp
 	"material.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/object.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/object.cpp
 	"object.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/path-trace.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/path-trace.cpp
 	"path-trace.h"
 
-1391651738 /home/jacob.lifshay/path-trace/include/path-trace.h
+1394240767 /home/jacob.lifshay/path-trace/include/path-trace.h
 	"misc.h"
 	"vector3d.h"
 	"span.h"
@@ -476,22 +476,22 @@
 	"difference.h"
 	<stdint.h>
 
-1391647226 /home/jacob.lifshay/path-trace/include/sphere.h
+1394227623 /home/jacob.lifshay/path-trace/include/sphere.h
 	"object.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/union.h
+1394227623 /home/jacob.lifshay/path-trace/include/union.h
 	"object.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/plane.h
+1394227623 /home/jacob.lifshay/path-trace/include/plane.h
 	"object.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/plane.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/plane.cpp
 	"plane.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/span.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/span.cpp
 	"span.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/sphere.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/sphere.cpp
 	"sphere.h"
 
 1391652261 source:/home/jacob.lifshay/path-trace/src/test.cpp
@@ -532,16 +532,16 @@
 1391650879 /home/jacob.lifshay/path-trace/include/condition_variable.h
 	"mutex.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/transform.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/transform.cpp
 	"transform.h"
 
-1391647226 /home/jacob.lifshay/path-trace/include/transform.h
+1394227623 /home/jacob.lifshay/path-trace/include/transform.h
 	"vector3d.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/union.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/union.cpp
 	"union.h"
 
-1391647227 source:/home/jacob.lifshay/path-trace/src/vector3d.cpp
+1394227624 source:/home/jacob.lifshay/path-trace/src/vector3d.cpp
 	"vector3d.h"
 
 1391721870 /home/lifsja/path-trace/include/thread.h

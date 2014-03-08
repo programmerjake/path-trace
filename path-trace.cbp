@@ -31,7 +31,7 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-march=k8" />
+			<Add option="-march=nocona" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add directory="include" />
