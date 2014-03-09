@@ -24,7 +24,7 @@ using namespace std;
 using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
-const int rendererCount = 1000;
+const int rendererCount = 200;
 const int rayCount = 10;
 const int rayDepth = 16;
 const int ScreenWidth = 1920, ScreenHeight = 1080;
@@ -41,7 +41,7 @@ static int getBlockSize(int count)
     return retval / 4;
 }
 
-const int blockSize = getBlockSize(ScreenWidth / 2), maximumSampleSize = ScreenHeight / (480 / 4);
+const int blockSize = getBlockSize(ScreenWidth / 8), maximumSampleSize = ScreenHeight / (480 / 4);
 
 Object *unionArray(Object *array[], int start, int end)
 {
