@@ -25,11 +25,11 @@ using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
 const int rendererCount = 1000;
-const int rayCount = 500;
+const int rayCount = 10;
 const int rayDepth = 16;
 const int ScreenWidth = 1920, ScreenHeight = 1080;
 const char *const ProgramName = "Path Trace Test";
-const float minimumColorDelta = 0.001; // if the color change is less than this then we don't need to check inside this box
+const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
 
 static int getBlockSize(int count)
 {

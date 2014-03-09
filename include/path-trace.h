@@ -123,7 +123,7 @@ inline Color traceRay(const Ray &ray, SpanIterator &spanIterator, int depth = De
     }
 
     // diffuse/specular reflect
-    int scatter_ray_count = 5000 * strength;
+    int scatter_ray_count = 10000 * strength * addFactor;
     if(material->scatter_coefficient <= eps)
     {
         scatter_ray_count = 1;
