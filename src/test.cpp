@@ -19,6 +19,7 @@
 #include <cstring>
 #include <signal.h>
 #include <errno.h>
+#include "image_texture.h"
 
 using namespace std;
 using namespace PathTrace;
@@ -27,7 +28,7 @@ const bool multiThreaded = true;
 const int rendererCount = 200;
 const int rayCount = 1;
 const int rayDepth = 16;
-const int ScreenWidth = 192, ScreenHeight = 108;
+const int ScreenWidth = 192 * 3, ScreenHeight = 108 * 3;
 const char *const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
 
@@ -79,6 +80,15 @@ Vector3D interpolate(float t, Vector3D a, Vector3D b)
     return a + t * (b - a);
 }
 
+Material * makeSkyBox(string folderName)
+{
+    if(folderName == "")
+        folderName = ".";
+    else if(folderName[folderName.size() - 1] == '/')
+        folderName.erase(folderName.size() - 1);
+    return new Material(new ColorTexture(0), new ColorTexture(0), new ImageSkyboxTexture(Image(folderName + "/top.png"), Image(folderName + "/bottom.png"), Image(folderName + "/left.png"), Image(folderName + "/right.png"), Image(folderName + "/front.png"), Image(folderName + "/back.png")));
+}
+
 Object *makeWorld()
 {
     static Material matEmitR(new ColorTexture(0), new ColorTexture(0), new ColorTexture(24, 0, 0));
@@ -87,26 +97,30 @@ Object *makeWorld()
     static Material matEmitW(new ColorTexture(0), new ColorTexture(0), new ColorTexture(2));
     static Material matEmitBrightW(new ColorTexture(0), new ColorTexture(0), new ColorTexture(40));
     static Material matDiffuseWhite(new ColorTexture(0.8), new ColorTexture(1));
+    static Material matBrightDiffuseWhite(new ColorTexture(8), new ColorTexture(1));
     static Material matGlass(new ColorTexture(0.7), new ColorTexture(0), new ColorTexture(0), new ColorTexture(0.9), 1.3, new ColorTexture(1));
     static Material matDiamond(new ColorTexture(0.2), new ColorTexture(0), new ColorTexture(0), new ColorTexture(0.9), 2.419, new ColorTexture(1));
     static Material matMirror(new ColorTexture(0.99), new ColorTexture(0));
+    static Material matImageInternal(new ImageTexture(Image("image.png")));
+    static Material & matImage = *transform(Matrix::scale(0.1), &matImageInternal);
+    static Material & matSkyBox = *transform(Matrix::rotateX(1 * M_PI / 4), makeSkyBox("sky01"));
     Object *objects[] =
     {
-        new Sphere(Vector3D(-1 + sin(M_PI * 2 / 3) * 3, 6 + cos(M_PI * 2 / 3) * 3, 14), 6, &matEmitR),
+        /*new Sphere(Vector3D(-1 + sin(M_PI * 2 / 3) * 3, 6 + cos(M_PI * 2 / 3) * 3, 14), 6, &matEmitR),
         new Sphere(Vector3D(-1 + sin(M_PI * 4 / 3) * 3, 6 + cos(M_PI * 2 / 3) * 3, 14), 6, &matEmitB),
         new Sphere(Vector3D(-1, 6 + 3, 14), 6, &matEmitG),
         new Sphere(Vector3D(-1, 6, 14), 6, &matEmitBrightW),
-        new Sphere(Vector3D(-1, 6, 16), 7.5, &matMirror),
-        new Sphere(Vector3D(1, 0, -4), 0.2, &matDiffuseWhite),
-        new Sphere(Vector3D(-1, 0, -4), 0.2, &matDiffuseWhite),
-        new Plane(Vector3D(0, 0, -1), 10, &matDiffuseWhite),
-        new Plane(Vector3D(0, 0, 1), 20, &matDiffuseWhite),
-        new Plane(Vector3D(0, -1, 0), 20, &matEmitW),
-        new Plane(Vector3D(0, 1, 0), 5, &matDiffuseWhite),
-        new Plane(Vector3D(-1, 0, 0), 20, &matDiffuseWhite),
-        new Plane(Vector3D(1, 0, 0), 20, &matDiffuseWhite),
-        makeLens(Vector3D(-2.5 / 4, 0, -2.5), Vector3D(-1, 0, -4), 0.5, 1, &matGlass),
-        makeLensPointedAt(interpolate(0.9, Vector3D(-1, 10, 14), Vector3D(0, 0, -10)), Vector3D(0, -1, -20), 1.2, 2.5, &matDiamond),
+        new Sphere(Vector3D(-1, 6, 16), 7.5, &matMirror),*/
+        new Sphere(Vector3D(1, 0, -4), 0.2, &matBrightDiffuseWhite),
+        new Sphere(Vector3D(-1, 0, -4), 0.2, &matBrightDiffuseWhite),
+        new Plane(Vector3D(0, 0, -1), 200, &matSkyBox),
+        new Plane(Vector3D(0, 0, 1), 200, &matSkyBox),
+        new Plane(Vector3D(0, -1, 0), 200, &matSkyBox),
+        new Plane(Vector3D(0, 1, 0), 200, &matSkyBox),
+        new Plane(Vector3D(1, 0, 0), 200, &matSkyBox),
+        new Plane(Vector3D(-1, 0, 0), 200, &matSkyBox),
+        /*makeLens(Vector3D(-2.5 / 4, 0, -2.5), Vector3D(-1, 0, -4), 0.5, 1, &matGlass),
+        makeLensPointedAt(interpolate(0.9, Vector3D(-1, 10, 14), Vector3D(0, 0, -10)), Vector3D(0, -1, -20), 1.2, 2.5, &matDiamond),*/
     };
     return unionArray(objects, 0, sizeof(objects) / sizeof(objects[0]));
 }

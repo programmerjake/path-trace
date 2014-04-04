@@ -19,28 +19,154 @@
 #include "png_decoder.h"
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <cctype>
 
 using PathTrace::Color;
+using namespace std;
 
-Image::Image(string fileName)
+namespace
 {
+bool matches(istream & is, string v)
+{
+    char * buffer = new char[v.size()];
     try
     {
-        PngDecoder decoder(fileName);
-        const size_t arraySize = FloatsPerPixel * decoder.width() * decoder.height();
-        float *newArray = new float[arraySize];
-        uint8_t *array = decoder.removeData();
-        for(size_t i = 0; i < arraySize; i++)
-        {
-            newArray[i] = (int)array[i] / 255.0f;
-        }
-        delete []array;
-        data = new data_t(newArray, decoder.width(), decoder.height());
+        if(!is.read(buffer, v.size()))
+            return false;
     }
-    catch(PngLoadError &e)
+    catch(...)
     {
-        throw ImageLoadError(e.what());
+        delete []buffer;
+        throw;
     }
+    bool retval = (v == string(buffer, v.size()));
+    delete []buffer;
+    return retval;
+}
+}
+
+Image::Image(string fileName, string format)
+{
+    if(format == "")
+    {
+        size_t index = fileName.find_last_of('.');
+        if(index == string::npos)
+            throw ImageLoadError("can't determine format");
+        format = fileName.substr(index + 1);
+        for(size_t i = 0; i < format.size(); i++)
+            format[i] = tolower(format[i]);
+    }
+    if(format == "png")
+    {
+        try
+        {
+            PngDecoder decoder(fileName);
+            const size_t arraySize = FloatsPerPixel * decoder.width() * decoder.height();
+            float *newArray = new float[arraySize];
+            uint8_t *array = decoder.removeData();
+            for(size_t i = 0; i < arraySize; i++)
+            {
+                newArray[i] = (int)array[i] / 255.0f;
+            }
+            delete []array;
+            data = new data_t(newArray, decoder.width(), decoder.height());
+        }
+        catch(PngLoadError &e)
+        {
+            throw ImageLoadError(e.what());
+        }
+    }
+    else if(format == "hdr" || format == "pic")
+    {
+        ifstream is(fileName, ios::binary);
+        if(!matches(is, "#?RADIANCE\n"))
+            throw ImageLoadError("magic string doesn't match");
+        bool gotFormat = false;
+        float scaleFactor = 1;
+        while(true)
+        {
+            string v = "";
+            char ch;
+            while(true)
+            {
+                if(!is.get(ch))
+                    throw ImageLoadError("unexpected EOF");
+                if(ch == '=')
+                {
+                    break;
+                }
+                if(ch == '#')
+                {
+                    while(true)
+                    {
+                        if(!is.get(ch))
+                            throw ImageLoadError("unexpected EOF");
+                        if(ch == '\n')
+                            break;
+                    }
+                }
+                if(ch == ' ')
+                {
+                    continue;
+                }
+                if(ch == '\n')
+                {
+                    if(v != "")
+                        throw ImageLoadError("unexpected token");
+                    continue;
+                }
+                if(ch == '+' || ch == '-')
+                {
+                    if(v != "")
+                        throw ImageLoadError("unexpected token");
+                    goto at_size;
+                }
+                if(!isalpha(ch))
+                    throw ImageLoadError("unexpected character");
+                v += ch;
+            }
+            if(v == "FORMAT")
+            {
+                if(gotFormat)
+                    throw ImageLoadError("format already specified");
+                gotFormat = true;
+                if(!matches(is, "32-bit_rle_rgbe\n"))
+                    throw ImageLoadError("invalid format specifier");
+            }
+            else if(v == "EXPOSURE")
+            {
+                float exposure;
+                if(!is >> exposure)
+                    throw ImageLoadError("can't read exposure value");
+                while(true)
+                {
+                    char ch;
+                    if(!is.get(ch))
+                        throw ImageLoadError("unexpected EOF");
+                    if(ch == '\n')
+                        break;
+                    if(!isspace(ch))
+                        throw ImageLoadError("unexpected character");
+                }
+                scaleFactor /=
+            }
+            else // unknown variable
+            {
+                while(true)
+                {
+                    char ch;
+                    if(!is.get(ch))
+                        throw ImageLoadError("unexpected EOF");
+                    if(ch == '\n')
+                        break;
+                }
+            }
+        }
+at_size:
+    }
+    else
+        throw ImageLoadError("invalid format");
 }
 
 Image::Image()

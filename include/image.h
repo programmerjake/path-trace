@@ -39,7 +39,7 @@ public:
 class Image
 {
 public:
-    explicit Image(string fileName);
+    explicit Image(string fileName, string format = "");
     Image();
     ~Image();
     Image(const Image & rt);
