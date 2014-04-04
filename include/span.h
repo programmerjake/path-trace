@@ -4,6 +4,7 @@
 #include "vector3d.h"
 #include "material.h"
 #include "ray.h"
+#include "transform.h"
 
 namespace PathTrace
 {
@@ -118,6 +119,13 @@ public:
     }
 };
 
+inline Span transform(const Matrix &m, Span span)
+{
+    span.startNormal = normalize(m.applyNoTranslate(span.startNormal));
+    span.endNormal = normalize(m.applyNoTranslate(span.endNormal));
+    return span;
+}
+
 class SpanIterator
 {
 public:
@@ -157,6 +165,9 @@ protected:
     SpanIterator()
     {
     }
+private:
+    SpanIterator(const SpanIterator & rt); // not implemented
+    const SpanIterator & operator =(const SpanIterator & rt); // not implemented
 };
 
 }

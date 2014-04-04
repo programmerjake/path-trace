@@ -2,10 +2,4 @@
 
 namespace PathTrace
 {
-
-Transform::Transform()
-{
-    //ctor
-}
-
 }

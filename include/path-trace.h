@@ -98,22 +98,24 @@ inline Color traceRay(const Ray &ray, SpanIterator &spanIterator, int depth = De
     {
         return Color(0, 0, 0);
     }
+    Vector3D hitPos = ray.getPoint(t);
     //ior = 1 / ior;
-    Color retval = material->emissive;
+    Color retval = material->emissive->getColor(hitPos);
     float addFactor = 1;
     if(depth <= 0 || strength < eps)
     {
         return retval;
     }
     //uniform_real_distribution<float> zeroToOne(0, 1);
-    float refractFactor = material->transmit_reflect_coefficient * ray.dir.refractStrength(ior, normal);
+    float refractFactor = std::max(0.0f, std::min(1.0f, material->transmit_reflect_coefficient->getFloat(hitPos))) * ray.dir.refractStrength(ior, normal);
     if(refractFactor > eps) // transmit
     {
         Vector3D refractedRayDir = ray.dir.refract(ior, normal);
         if(refractedRayDir != Vector3D(0, 0, 0))
         {
-            Ray newRay = Ray(ray.getPoint(t), refractedRayDir);
-            retval += addFactor * refractFactor * material->transmit * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * refractFactor * addFactor * abs(material->transmit));
+            Ray newRay = Ray(hitPos, refractedRayDir);
+            Color transmit = material->transmit->getColor(hitPos);
+            retval += addFactor * refractFactor * transmit * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength * refractFactor * addFactor * abs(transmit));
             addFactor *= 1 - refractFactor;
         }
     }
@@ -123,19 +125,21 @@ inline Color traceRay(const Ray &ray, SpanIterator &spanIterator, int depth = De
     }
 
     // diffuse/specular reflect
-    int scatter_ray_count = (int)(10000 * strength * addFactor * material->scatter_coefficient);
-    if(material->scatter_coefficient <= eps)
+    float scatter_coefficient = material->scatter_coefficient->getFloat(hitPos);
+    scatter_coefficient = std::max(0.0f, std::min(1.0f, scatter_coefficient));
+    int scatter_ray_count = (int)(10000 * strength * addFactor * scatter_coefficient);
+    if(scatter_coefficient <= eps)
     {
         scatter_ray_count = 1;
     }
     if(scatter_ray_count == 0)
         scatter_ray_count = 1;
+    Color reflect = material->reflect->getColor(hitPos);
     for(int i = 0; i < scatter_ray_count; i++)
     {
         Vector3D reflectedRayDir = ray.dir.reflect(normal);
         Vector3D resultingRayDir = reflectedRayDir;
-        assert(material->scatter_coefficient >= 0 && material->scatter_coefficient <= 1);
-        if(material->scatter_coefficient > eps)
+        if(scatter_coefficient > eps)
         {
             int count = 0;
             do
@@ -147,15 +151,15 @@ inline Color traceRay(const Ray &ray, SpanIterator &spanIterator, int depth = De
                     return retval;
                 }
                 resultingRayDir = Vector3D::rand(randomEngine, 1, 0);
-                resultingRayDir += (1 / material->scatter_coefficient - 1) * reflectedRayDir;
+                resultingRayDir += (1 / scatter_coefficient - 1) * reflectedRayDir;
             }
             while(dot(normal, resultingRayDir) <= eps);
             resultingRayDir = normalize(resultingRayDir);
         }
 
-        float factor = 1 - (1 - dot(resultingRayDir, normal)) * material->scatter_coefficient;
+        float factor = 1 - (1 - dot(resultingRayDir, normal)) * scatter_coefficient;
         Ray newRay = Ray(ray.getPoint(t), resultingRayDir);
-        retval += addFactor / scatter_ray_count * factor * material->reflect * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength / scatter_ray_count * addFactor * factor * abs(material->reflect));
+        retval += addFactor / scatter_ray_count * factor * reflect * traceRay(newRay, spanIterator, depth - 1, randomEngine, strength / scatter_ray_count * addFactor * factor * abs(reflect));
     }
     return retval;
 }

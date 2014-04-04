@@ -12,6 +12,10 @@ public:
     Sphere(Vector3D center, float r, const Material * material);
     virtual ~Sphere();
     virtual SpanIterator * makeSpanIterator() const;
+    virtual Object *duplicate() const
+    {
+        return new Sphere(center, r, material);
+    }
 protected:
 private:
     Vector3D center;

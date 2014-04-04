@@ -116,4 +116,49 @@ public:
     }
 };
 
+class atomic_uint : public atomic_base<unsigned>
+{
+public:
+
+    atomic_uint(unsigned v = 0)
+        : atomic_base<unsigned>(v)
+    {
+    }
+    const atomic_uint & operator =(unsigned v)
+    {
+        m.lock();
+        value = v;
+        m.unlock();
+        return *this;
+    }
+    const unsigned operator ++()
+    {
+        m.lock();
+        unsigned retval = ++value;
+        m.unlock();
+        return retval;
+    }
+    const unsigned operator ++(int)
+    {
+        m.lock();
+        unsigned retval = value++;
+        m.unlock();
+        return retval;
+    }
+    const unsigned operator --()
+    {
+        m.lock();
+        unsigned retval = --value;
+        m.unlock();
+        return retval;
+    }
+    const unsigned operator --(int)
+    {
+        m.lock();
+        unsigned retval = value--;
+        m.unlock();
+        return retval;
+    }
+};
+
 #endif // ATOMIC_H_INCLUDED

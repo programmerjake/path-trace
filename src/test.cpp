@@ -25,9 +25,9 @@ using namespace PathTrace;
 const char * NET_PORT = "12346";
 const bool multiThreaded = true;
 const int rendererCount = 200;
-const int rayCount = 10;
+const int rayCount = 1;
 const int rayDepth = 16;
-const int ScreenWidth = 1920, ScreenHeight = 1080;
+const int ScreenWidth = 192, ScreenHeight = 108;
 const char *const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
 
@@ -81,15 +81,15 @@ Vector3D interpolate(float t, Vector3D a, Vector3D b)
 
 Object *makeWorld()
 {
-    static Material matEmitR = Material(Color(0, 0, 0), 0, Color(24, 0, 0));
-    static Material matEmitG = Material(Color(0, 0, 0), 0, Color(0, 24, 0));
-    static Material matEmitB = Material(Color(0, 0, 0), 0, Color(0, 0, 24));
-    static Material matEmitW = Material(Color(0, 0, 0), 0, Color(2, 2, 2));
-    static Material matEmitBrightW = Material(Color(0, 0, 0), 0, Color(40, 40, 40));
-    static Material matDiffuseWhite = Material(Color(0.8, 0.8, 0.8), 1);
-    static Material matGlass = Material(Color(0.7, 0.7, 0.7), 0, Color(0, 0, 0), Color(0.9, 0.9, 0.9), 1.3, 1);
-    static Material matDiamond = Material(Color(0.2, 0.2, 0.2), 0, Color(0, 0, 0), Color(0.9, 0.9, 0.9), 2.419, 1);
-    static Material matMirror = Material(Color(0.99, 0.99, 0.99), 0);
+    static Material matEmitR(new ColorTexture(0), new ColorTexture(0), new ColorTexture(24, 0, 0));
+    static Material matEmitG(new ColorTexture(0), new ColorTexture(0), new ColorTexture(0, 24, 0));
+    static Material matEmitB(new ColorTexture(0), new ColorTexture(0), new ColorTexture(0, 0, 24));
+    static Material matEmitW(new ColorTexture(0), new ColorTexture(0), new ColorTexture(2));
+    static Material matEmitBrightW(new ColorTexture(0), new ColorTexture(0), new ColorTexture(40));
+    static Material matDiffuseWhite(new ColorTexture(0.8), new ColorTexture(1));
+    static Material matGlass(new ColorTexture(0.7), new ColorTexture(0), new ColorTexture(0), new ColorTexture(0.9), 1.3, new ColorTexture(1));
+    static Material matDiamond(new ColorTexture(0.2), new ColorTexture(0), new ColorTexture(0), new ColorTexture(0.9), 2.419, new ColorTexture(1));
+    static Material matMirror(new ColorTexture(0.99), new ColorTexture(0));
     Object *objects[] =
     {
         new Sphere(Vector3D(-1 + sin(M_PI * 2 / 3) * 3, 6 + cos(M_PI * 2 / 3) * 3, 14), 6, &matEmitR),

@@ -13,6 +13,10 @@ public:
     Plane(Vector3D normal, Vector3D pos, const Material * material);
     virtual SpanIterator * makeSpanIterator() const;
     virtual ~Plane();
+    virtual Object *duplicate() const
+    {
+        return new Plane(normal, d, material);
+    }
 protected:
 private:
     const Vector3D normal;

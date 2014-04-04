@@ -49,6 +49,12 @@ public:
         this->y = y;
         this->z = z;
     }
+    Vector3D(float v)
+    {
+        this->x = v;
+        this->y = v;
+        this->z = v;
+    }
     ~Vector3D()
     {
     }
@@ -210,8 +216,6 @@ public:
     {
         return o << "<" << v.x << ", " << v.y << ", " << v.z << ">";
     }
-protected:
-private:
 };
 
 }

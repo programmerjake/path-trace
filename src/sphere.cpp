@@ -32,17 +32,18 @@ public:
     {
         ended = false;
         Vector3D origin_minus_center = ray.origin - center;
+        float a = abs_squared(ray.dir);
         float b = dot(origin_minus_center, ray.dir);
         float c = dot(origin_minus_center, origin_minus_center) - r_squared;
-        float sqrt_arg = b * b - c;
+        float sqrt_arg = b * b - a * c;
         if(sqrt_arg <= eps)
         {
             ended = true;
             return;
         }
         float sqrt_v = std::sqrt(sqrt_arg);
-        theSpan.start = -b - sqrt_v;
-        theSpan.end = -b + sqrt_v;
+        theSpan.start = (-b - sqrt_v) / a;
+        theSpan.end = (-b + sqrt_v) / a;
         theSpan.startNormal = normalize(ray.getPoint(theSpan.start) - center);
         theSpan.endNormal = normalize(ray.getPoint(theSpan.end) - center);
     }
