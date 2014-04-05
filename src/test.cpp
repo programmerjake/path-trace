@@ -103,7 +103,9 @@ Object *makeWorld()
     static Material matMirror(new ColorTexture(0.99), new ColorTexture(0));
     static Material matImageInternal(new ImageTexture(Image("image.png")));
     static Material & matImage = *transform(Matrix::scale(0.1), &matImageInternal);
-    static Material & matSkyBox = *transform(Matrix::rotateX(1 * M_PI / 4), makeSkyBox("sky01"));
+    static Material matImageEmitInternal(new ColorTexture(0), new ColorTexture(0), new ImageTexture(Image("image.png")));
+    static Material & matImageEmit = *transform(Matrix::translate(-1, 0, -4).inverse(), &matImageEmitInternal);
+    static Material & matSkyBox = *transform(Matrix::rotateY(2 * M_PI / 4), makeSkyBox("sky01"));
     Object *objects[] =
     {
         /*new Sphere(Vector3D(-1 + sin(M_PI * 2 / 3) * 3, 6 + cos(M_PI * 2 / 3) * 3, 14), 6, &matEmitR),
@@ -111,16 +113,17 @@ Object *makeWorld()
         new Sphere(Vector3D(-1, 6 + 3, 14), 6, &matEmitG),
         new Sphere(Vector3D(-1, 6, 14), 6, &matEmitBrightW),
         new Sphere(Vector3D(-1, 6, 16), 7.5, &matMirror),*/
-        new Sphere(Vector3D(1, 0, -4), 0.2, &matBrightDiffuseWhite),
-        new Sphere(Vector3D(-1, 0, -4), 0.2, &matBrightDiffuseWhite),
+        new Sphere(Vector3D(1, 0, -4), 0.2, transform(Matrix::translate(-1, 0, 4), &matSkyBox)),
+        new Intersection(new Sphere(Vector3D(1, 0, -4), 0.2 * 5, &matGlass), new Union(new Plane(Vector3D(-1, 0, -0.7), Vector3D(1, 0, -4), &matGlass), new Sphere(Vector3D(1, 0, -4), 0.2, transform(Matrix::translate(-1, 0, 4), &matEmitW)))),
+        new Sphere(Vector3D(-1, 0, -4), 0.2, &matDiffuseWhite),
         new Plane(Vector3D(0, 0, -1), 200, &matSkyBox),
         new Plane(Vector3D(0, 0, 1), 200, &matSkyBox),
         new Plane(Vector3D(0, -1, 0), 200, &matSkyBox),
         new Plane(Vector3D(0, 1, 0), 200, &matSkyBox),
         new Plane(Vector3D(1, 0, 0), 200, &matSkyBox),
         new Plane(Vector3D(-1, 0, 0), 200, &matSkyBox),
-        /*makeLens(Vector3D(-2.5 / 4, 0, -2.5), Vector3D(-1, 0, -4), 0.5, 1, &matGlass),
-        makeLensPointedAt(interpolate(0.9, Vector3D(-1, 10, 14), Vector3D(0, 0, -10)), Vector3D(0, -1, -20), 1.2, 2.5, &matDiamond),*/
+        makeLens(Vector3D(-2.5 / 4, 0, -2.5), Vector3D(-1, 0, -4), 0.5, 1, &matGlass),
+        //makeLensPointedAt(interpolate(0.9, Vector3D(-1, 10, 14), Vector3D(0, 0, -10)), Vector3D(0, -1, -20), 1.2, 2.5, &matDiamond),
     };
     return unionArray(objects, 0, sizeof(objects) / sizeof(objects[0]));
 }

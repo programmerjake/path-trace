@@ -128,7 +128,7 @@ private:
         return image.getPixelAlpha(xi, yi);
     }
 public:
-    ImageSkyboxTexture(Image top, Image bottom, Image left, Image right, Image front, Image back)
+    ImageSkyboxAlphaTexture(Image top, Image bottom, Image left, Image right, Image front, Image back)
         : top(top), bottom(bottom), left(left), right(right), front(front), back(back)
     {
     }
@@ -171,12 +171,12 @@ public:
             return Color(get(v.x / a.y, v.z / a.y, top));
         }
         if(v.z < 0)
-            return Color(get(v.x / a.z, v.y / a.z, back);
+            return Color(get(v.x / a.z, v.y / a.z, back));
         return Color(get(-v.x / a.z, v.y / a.z, front));
     }
     virtual Texture *duplicate() const
     {
-        return new ImageSkyboxTexture(top, bottom, left, right, front, back);
+        return new ImageSkyboxAlphaTexture(top, bottom, left, right, front, back);
     }
 };
 }

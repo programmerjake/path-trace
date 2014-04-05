@@ -77,9 +77,12 @@ Image::Image(string fileName, string format)
             throw ImageLoadError(e.what());
         }
     }
+#if 1
+#warning finish implementing hdr load
+#else
     else if(format == "hdr" || format == "pic")
     {
-        ifstream is(fileName, ios::binary);
+        ifstream is(fileName.c_str(), ios::binary);
         if(!matches(is, "#?RADIANCE\n"))
             throw ImageLoadError("magic string doesn't match");
         bool gotFormat = false;
@@ -149,7 +152,7 @@ Image::Image(string fileName, string format)
                     if(!isspace(ch))
                         throw ImageLoadError("unexpected character");
                 }
-                scaleFactor /=
+                scaleFactor /= exposure;
             }
             else // unknown variable
             {
@@ -165,6 +168,7 @@ Image::Image(string fileName, string format)
         }
 at_size:
     }
+#endif
     else
         throw ImageLoadError("invalid format");
 }
