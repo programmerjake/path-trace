@@ -36,6 +36,15 @@ public:
     }
 };
 
+class ImageStoreError : public runtime_error
+{
+public:
+    explicit ImageStoreError(const string &arg)
+        : runtime_error(arg)
+    {
+    }
+};
+
 class Image
 {
 public:
@@ -88,6 +97,119 @@ private:
     };
     data_t * data;
     enum {FloatsPerPixel = 4};
+    friend class MutableImage;
+};
+
+class MutableImage
+{
+private:
+    float * data;
+    unsigned w, h;
+    enum {FloatsPerPixel = 4};
+public:
+    MutableImage(unsigned w, unsigned h)
+        : data(new float[(size_t)FloatsPerPixel * w * h]), w(w), h(h)
+    {
+        assert(w > 0 && h > 0);
+        for(size_t i = 0; i < (size_t)FloatsPerPixel * w * h; i++)
+        {
+            data[i] = 0;
+        }
+    }
+    explicit MutableImage(Image img)
+    {
+        if(!img)
+            throw runtime_error("can't create MutableImage from empty Image");
+        w = img.width();
+        h = img.height();
+        data = new float[(size_t)FloatsPerPixel * w * h];
+        for(size_t i = 0; i < (size_t)FloatsPerPixel * w * h; i++)
+        {
+            data[i] = img.data->data[i];
+        }
+    }
+    MutableImage(const MutableImage & rt)
+        : data(new float[(size_t)FloatsPerPixel * rt.w * rt.h]), w(rt.w), h(rt.h)
+    {
+        for(size_t i = 0; i < (size_t)FloatsPerPixel * w * h; i++)
+        {
+            data[i] = rt.data[i];
+        }
+    }
+    ~MutableImage()
+    {
+        delete []data;
+    }
+    const MutableImage & operator =(const MutableImage & rt)
+    {
+        if(data == rt.data)
+            return *this;
+        if(w != rt.w || h != rt.h)
+        {
+            delete []data;
+            data = new float[(size_t)FloatsPerPixel * rt.w * rt.h];
+        }
+        w = rt.w;
+        h = rt.h;
+        for(size_t i = 0; i < (size_t)FloatsPerPixel * w * h; i++)
+        {
+            data[i] = rt.data[i];
+        }
+        return *this;
+    }
+    PathTrace::Color getPixel(int x, int y) const
+    {
+        if(y < 0 || (unsigned)y >= h || x < 0 || (unsigned)x >= w)
+        {
+            return PathTrace::Color();
+        }
+
+        float *pixel = &data[FloatsPerPixel * (x + y * (size_t)w)];
+        return PathTrace::Color(pixel[0], pixel[1], pixel[2]);
+    }
+    PathTrace::Color getPixelAlpha(int x, int y) const
+    {
+        if(y < 0 || (unsigned)y >= h || x < 0 || (unsigned)x >= w)
+        {
+            return PathTrace::Color();
+        }
+
+        float *pixel = &data[FloatsPerPixel * (x + y * (size_t)w)];
+        return pixel[3];
+    }
+    void setPixel(int x, int y, PathTrace::Color c, float alpha = 1)
+    {
+        if(y < 0 || (unsigned)y >= h || x < 0 || (unsigned)x >= w)
+        {
+            return;
+        }
+
+        float *pixel = &data[FloatsPerPixel * (x + y * (size_t)w)];
+        pixel[0] = c.x;
+        pixel[1] = c.y;
+        pixel[2] = c.z;
+        pixel[3] = alpha;
+    }
+    unsigned width() const
+    {
+        return w;
+    }
+    unsigned height() const
+    {
+        return h;
+    }
+    operator Image() const
+    {
+        Image retval;
+        float * newData = new float[(size_t)FloatsPerPixel * w * h];
+        for(size_t i = 0; i < (size_t)FloatsPerPixel * w * h; i++)
+        {
+            newData[i] = data[i];
+        }
+        retval.data = new Image::data_t(newData, w, h);
+        return retval;
+    }
+    void writeHDR(string fileName) const;
 };
 
 #endif // IMAGE_H

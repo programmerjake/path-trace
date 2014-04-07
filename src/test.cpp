@@ -20,6 +20,11 @@
 #include <signal.h>
 #include <errno.h>
 #include "image_texture.h"
+#include "transform_texture.h"
+#include "filter_texture.h"
+
+#define WRITE_BMP
+#define WRITE_HDR
 
 using namespace std;
 using namespace PathTrace;
@@ -28,7 +33,7 @@ const bool multiThreaded = true;
 const int rendererCount = 200;
 const int rayCount = 1;
 const int rayDepth = 16;
-const int ScreenWidth = 192 * 3, ScreenHeight = 108 * 3;
+const int ScreenWidth = 192, ScreenHeight = 108;
 const char *const ProgramName = "Path Trace Test";
 const float minimumColorDelta = 0.003; // if the color change is less than this then we don't need to check inside this box
 
@@ -89,6 +94,16 @@ Material * makeSkyBox(string folderName)
     return new Material(new ColorTexture(0), new ColorTexture(0), new ImageSkyboxTexture(Image(folderName + "/top.png"), Image(folderName + "/bottom.png"), Image(folderName + "/left.png"), Image(folderName + "/right.png"), Image(folderName + "/front.png"), Image(folderName + "/back.png")));
 }
 
+Material * makeSkyMirrorSphere(string fileName, Color scaleFactor = Color(1))
+{
+    return new Material(new ColorTexture(0), new ColorTexture(0), new MultiplyTexture(scaleFactor, new MirrorBallSkymapTexture(new ImageTexture(Image(fileName)))));
+}
+
+Material * makeSkySphericalCoordinates(string fileName, Color scaleFactor = Color(1))
+{
+    return new Material(new ColorTexture(0), new ColorTexture(0), new MultiplyTexture(scaleFactor, new SphericalCoordinatesSkymapTexture(new ImageTexture(Image(fileName)))));
+}
+
 Object *makeWorld()
 {
     static Material matEmitR(new ColorTexture(0), new ColorTexture(0), new ColorTexture(24, 0, 0));
@@ -101,11 +116,11 @@ Object *makeWorld()
     static Material matGlass(new ColorTexture(0.7), new ColorTexture(0), new ColorTexture(0), new ColorTexture(0.9), 1.3, new ColorTexture(1));
     static Material matDiamond(new ColorTexture(0.2), new ColorTexture(0), new ColorTexture(0), new ColorTexture(0.9), 2.419, new ColorTexture(1));
     static Material matMirror(new ColorTexture(0.99), new ColorTexture(0));
-    static Material matImageInternal(new ImageTexture(Image("image.png")));
-    static Material & matImage = *transform(Matrix::scale(0.1), &matImageInternal);
-    static Material matImageEmitInternal(new ColorTexture(0), new ColorTexture(0), new ImageTexture(Image("image.png")));
-    static Material & matImageEmit = *transform(Matrix::translate(-1, 0, -4).inverse(), &matImageEmitInternal);
-    static Material & matSkyBox = *transform(Matrix::rotateY(2 * M_PI / 4), makeSkyBox("sky01"));
+    //static Material matImageInternal(new ImageTexture(Image("test2.hdr")));
+    //static Material & matImage = *transform(Matrix::scale(0.1), &matImageInternal);
+    static Material matImageEmitInternal(new ColorTexture(0), new ColorTexture(0), new ImageTexture(Image("test2.hdr")));
+    //static Material & matImageEmit = *transform(Matrix::translate(-1, 0, -4).inverse(), &matImageEmitInternal);
+    static Material & matSkyBox = *transform(Matrix::rotateX(2 * M_PI / 4), makeSkySphericalCoordinates("Serpentine_Valley_3k.hdr", Color(0.01)));
     Object *objects[] =
     {
         /*new Sphere(Vector3D(-1 + sin(M_PI * 2 / 3) * 3, 6 + cos(M_PI * 2 / 3) * 3, 14), 6, &matEmitR),
@@ -113,11 +128,12 @@ Object *makeWorld()
         new Sphere(Vector3D(-1, 6 + 3, 14), 6, &matEmitG),
         new Sphere(Vector3D(-1, 6, 14), 6, &matEmitBrightW),
         new Sphere(Vector3D(-1, 6, 16), 7.5, &matMirror),*/
-        new Sphere(Vector3D(1, 0, -4), 0.2, transform(Matrix::translate(-1, 0, 4), &matSkyBox)),
+        new Sphere(Vector3D(1, 0, -4), 0.2, transform(Matrix::translate(-1, 0, 4), &matDiffuseWhite)),
         new Intersection(new Sphere(Vector3D(1, 0, -4), 0.2 * 5, &matGlass), new Union(new Plane(Vector3D(-1, 0, -0.7), Vector3D(1, 0, -4), &matGlass), new Sphere(Vector3D(1, 0, -4), 0.2, transform(Matrix::translate(-1, 0, 4), &matEmitW)))),
         new Sphere(Vector3D(-1, 0, -4), 0.2, &matDiffuseWhite),
         new Plane(Vector3D(0, 0, -1), 200, &matSkyBox),
         new Plane(Vector3D(0, 0, 1), 200, &matSkyBox),
+        //new Plane(Vector3D(0, 0, 1), 1, transform(Matrix::translate(-0.5, -0.5, 0).concat(Matrix::scale(640.0f / 480, 1, 1)).inverse(), &matImageEmitInternal)),
         new Plane(Vector3D(0, -1, 0), 200, &matSkyBox),
         new Plane(Vector3D(0, 1, 0), 200, &matSkyBox),
         new Plane(Vector3D(1, 0, 0), 200, &matSkyBox),
@@ -310,11 +326,15 @@ class RenderBlock : public Runnable, public BlockRenderer
 {
 public:
     RenderBlock(const int x, const int y, int size, const Object *world)
-        : Runnable(), xOrigin(x), yOrigin(y), buffer(new Color[(size + 1) * (size + 1)]), validBuffer(new bool[(size + 1) * (size + 1)]), size(size), world(world), ran_finish(false), finished(false)
+        : Runnable(), xOrigin(x), yOrigin(y), buffer(new Color[(size + 1) * (size + 1)]), validBuffer(new bool[(size + 1) * (size + 1)]), wroteBuffer(new bool[(size + 1) * (size + 1)]), size(size), world(world), ran_finish(false), finished(false)
     {
         for(int i = 0; i < (size + 1) * (size + 1); i++)
         {
             validBuffer[i] = false;
+        }
+        for(int i = 0; i < (size + 1) * (size + 1); i++)
+        {
+            wroteBuffer[i] = false;
         }
         start();
     }
@@ -358,9 +378,10 @@ public:
         {
             for(int x = xOrigin; x < xOrigin + size; x++)
             {
-                if(validPixel(x, y))
+                if(validPixel(x, y) && !wrotePixel(x, y))
                 {
                     Color v = pixel(x, y);
+                    wrotePixel(x, y) = true;
                     fprintf(f, "P%i,%i=%g,%g,%g\n", x, y, v.x, v.y, v.z);
                 }
             }
@@ -381,6 +402,10 @@ private:
     bool &validPixel(int x, int y)
     {
         return validBuffer[x - xOrigin + (y - yOrigin) * (size + 1)];
+    }
+    bool &wrotePixel(int x, int y)
+    {
+        return wroteBuffer[x - xOrigin + (y - yOrigin) * (size + 1)];
     }
     void setPixel(int x, int y, Color color)
     {
@@ -411,7 +436,7 @@ private:
     }
     bool colorCloseEnough(Color a, Color b)
     {
-        return abs_squared(a - b) <= minimumColorDelta;
+        return abs_squared(a - b) <= minimumColorDelta * minimumColorDelta * abs_squared(a);
     }
     Color calcPixelColor(int x, int y)
     {
@@ -423,6 +448,7 @@ private:
             }
         }
         Color retval = tracePixel(*spanIterator, x, y, ScreenWidth, ScreenHeight, rayCount, rayDepth, ScreenWidth, ScreenHeight, min(ScreenWidth, ScreenHeight) * 2);
+#if 0
         float r = max(retval.x, max(retval.y, retval.z));
         if(r > 1)
         {
@@ -433,6 +459,7 @@ private:
             retval.y = min(1.0f, retval.y);
             retval.z = min(1.0f, retval.z);
         }
+#endif
         setPixel(x, y, retval);
         return retval;
     }
@@ -482,6 +509,7 @@ private:
     const int xOrigin, yOrigin;
     Color *const buffer;
     bool *const validBuffer;
+    bool *const wroteBuffer;
     const int size;
     const Object *world;
     bool ran_finish;
@@ -1021,9 +1049,27 @@ int main(int argc, char **argv)
                         if(by >= ScreenHeight)
                         {
                             rendered = true;
+#if defined(WRITE_BMP) || defined(WRITE_HDR)
                             char fname[100];
-                            sprintf(fname, "image%08X.bmp", (unsigned)time(NULL));
+                            unsigned theTime = (unsigned)time(NULL);
+#endif // WRITE_BMP || WRITE_HDR
+#ifdef WRITE_BMP
+                            sprintf(fname, "image%08X.bmp", theTime);
                             SDL_SaveBMP(screen, fname);
+#endif // WRITE_BMP
+#ifdef WRITE_HDR
+                            MutableImage img(ScreenWidth, ScreenHeight);
+                            for(int y = 0; y < ScreenHeight; y++)
+                            {
+                                for(int x = 0; x < ScreenWidth; x++)
+                                {
+                                    Color &c = screenBuffer[x + ScreenWidth * y];
+                                    img.setPixel(x, y, c / count);
+                                }
+                            }
+                            sprintf(fname, "image%08X.hdr", theTime);
+                            img.writeHDR(fname);
+#endif // WRITE_HDR
                         }
                     }
                 }

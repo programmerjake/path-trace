@@ -46,6 +46,7 @@
 		<Unit filename="include/color.h" />
 		<Unit filename="include/condition_variable.h" />
 		<Unit filename="include/difference.h" />
+		<Unit filename="include/filter_texture.h" />
 		<Unit filename="include/image.h" />
 		<Unit filename="include/image_texture.h" />
 		<Unit filename="include/intersection.h" />
@@ -62,6 +63,7 @@
 		<Unit filename="include/texture.h" />
 		<Unit filename="include/thread.h" />
 		<Unit filename="include/transform.h" />
+		<Unit filename="include/transform_texture.h" />
 		<Unit filename="include/union.h" />
 		<Unit filename="include/vector3d.h" />
 		<Unit filename="src/color.cpp" />

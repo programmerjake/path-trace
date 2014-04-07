@@ -1,58 +1,58 @@
 # depslib dependency file v1.0
-1391635872 source:/home/jacob/projects/path-trace/src/color.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/color.cpp
 	"color.h"
 
-1391635871 /home/jacob/projects/path-trace/include/color.h
+1391753954 /home/jacob/projects/path-trace/include/color.h
 	"vector3d.h"
 
-1396654341 /home/jacob/projects/path-trace/include/vector3d.h
+1396594266 /home/jacob/projects/path-trace/include/vector3d.h
 	<cmath>
 	<assert.h>
 	<iostream>
 	<stdint.h>
 	"misc.h"
 
-1391635871 /home/jacob/projects/path-trace/include/misc.h
+1391753954 /home/jacob/projects/path-trace/include/misc.h
 
-1391635872 source:/home/jacob/projects/path-trace/src/difference.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/difference.cpp
 	"difference.h"
 
-1396654341 /home/jacob/projects/path-trace/include/difference.h
+1396595052 /home/jacob/projects/path-trace/include/difference.h
 	"object.h"
 
-1396654341 /home/jacob/projects/path-trace/include/object.h
+1396594341 /home/jacob/projects/path-trace/include/object.h
 	"span.h"
 	"ray.h"
 
-1396654341 /home/jacob/projects/path-trace/include/span.h
+1396585803 /home/jacob/projects/path-trace/include/span.h
 	"vector3d.h"
 	"material.h"
 	"ray.h"
 	"transform.h"
 
-1396654341 /home/jacob/projects/path-trace/include/material.h
+1396593831 /home/jacob/projects/path-trace/include/material.h
 	"color.h"
 	"texture.h"
 
-1396654341 /home/jacob/projects/path-trace/include/ray.h
+1396585173 /home/jacob/projects/path-trace/include/ray.h
 	"vector3d.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/intersection.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/intersection.cpp
 	"intersection.h"
 
-1396654341 /home/jacob/projects/path-trace/include/intersection.h
+1396594693 /home/jacob/projects/path-trace/include/intersection.h
 	"object.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/material.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/material.cpp
 	"material.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/object.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/object.cpp
 	"object.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/path-trace.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/path-trace.cpp
 	"path-trace.h"
 
-1396654341 /home/jacob/projects/path-trace/include/path-trace.h
+1396594453 /home/jacob/projects/path-trace/include/path-trace.h
 	"misc.h"
 	"vector3d.h"
 	"span.h"
@@ -66,25 +66,25 @@
 	"difference.h"
 	<stdint.h>
 
-1396654341 /home/jacob/projects/path-trace/include/sphere.h
+1396594658 /home/jacob/projects/path-trace/include/sphere.h
 	"object.h"
 
-1396654341 /home/jacob/projects/path-trace/include/union.h
+1396594581 /home/jacob/projects/path-trace/include/union.h
 	"object.h"
 
-1396654341 /home/jacob/projects/path-trace/include/plane.h
+1396595016 /home/jacob/projects/path-trace/include/plane.h
 	"object.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/plane.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/plane.cpp
 	"plane.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/span.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/span.cpp
 	"span.h"
 
-1396654341 source:/home/jacob/projects/path-trace/src/sphere.cpp
+1396585464 source:/home/jacob/projects/path-trace/src/sphere.cpp
 	"sphere.h"
 
-1396655354 source:/home/jacob/projects/path-trace/src/test.cpp
+1396854087 source:/home/jacob/projects/path-trace/src/test.cpp
 	"path-trace.h"
 	<SDL.h>
 	<iostream>
@@ -105,6 +105,8 @@
 	<signal.h>
 	<errno.h>
 	"image_texture.h"
+	"transform_texture.h"
+	"filter_texture.h"
 
 1327664837 /usr/include/SDL/SDL.h
 	"SDL_main.h"
@@ -286,52 +288,52 @@
 	"begin_code.h"
 	"close_code.h"
 
-1391653490 /home/jacob/projects/path-trace/include/thread.h
+1391753954 /home/jacob/projects/path-trace/include/thread.h
 	<pthread.h>
 	<unistd.h>
 
-1391653490 /home/jacob/projects/path-trace/include/mutex.h
+1391753954 /home/jacob/projects/path-trace/include/mutex.h
 	<pthread.h>
 
-1396654341 /home/jacob/projects/path-trace/include/atomic.h
+1396596745 /home/jacob/projects/path-trace/include/atomic.h
 	"mutex.h"
 
-1391653490 /home/jacob/projects/path-trace/include/condition_variable.h
+1391753954 /home/jacob/projects/path-trace/include/condition_variable.h
 	"mutex.h"
 
-1396654341 source:/home/jacob/projects/path-trace/src/transform.cpp
+1396584737 source:/home/jacob/projects/path-trace/src/transform.cpp
 	"transform.h"
 
-1396654341 /home/jacob/projects/path-trace/include/transform.h
+1396594234 /home/jacob/projects/path-trace/include/transform.h
 	"vector3d.h"
 	"ray.h"
 	<cmath>
 	<stdexcept>
 
-1391635872 source:/home/jacob/projects/path-trace/src/union.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/union.cpp
 	"union.h"
 
-1391635872 source:/home/jacob/projects/path-trace/src/vector3d.cpp
+1391753954 source:/home/jacob/projects/path-trace/src/vector3d.cpp
 	"vector3d.h"
 
-1396654341 /home/jacob/projects/path-trace/include/texture.h
+1396594395 /home/jacob/projects/path-trace/include/texture.h
 	"color.h"
 	"vector3d.h"
 	"transform.h"
 
-1396654341 source:/home/jacob/projects/path-trace/src/png_decoder.cpp
+1396596285 source:/home/jacob/projects/path-trace/src/png_decoder.cpp
 	"png_decoder.h"
 	<png.h>
 	<cstdio>
 	<cstdlib>
 	<cerrno>
 
-1396654341 /home/jacob/projects/path-trace/include/png_decoder.h
+1396597767 /home/jacob/projects/path-trace/include/png_decoder.h
 	<string>
 	<stdint.h>
 	<stdexcept>
 
-1396654493 source:/home/jacob/projects/path-trace/src/image.cpp
+1396854209 source:/home/jacob/projects/path-trace/src/image.cpp
 	"image.h"
 	"png_decoder.h"
 	<cstring>
@@ -339,7 +341,7 @@
 	<fstream>
 	<cctype>
 
-1396654341 /home/jacob/projects/path-trace/include/image.h
+1396849320 /home/jacob/projects/path-trace/include/image.h
 	<stdint.h>
 	<string>
 	<stdexcept>
@@ -517,7 +519,13 @@
 	"image.h"
 	"texture.h"
 
-1396654521 /home/jacob/projects/path-trace/include/image_texture.h
+1396818932 /home/jacob/projects/path-trace/include/image_texture.h
 	"image.h"
+	"texture.h"
+
+1396843445 /home/jacob/projects/path-trace/include/transform_texture.h
+	"texture.h"
+
+1396834911 /home/jacob/projects/path-trace/include/filter_texture.h
 	"texture.h"
 
